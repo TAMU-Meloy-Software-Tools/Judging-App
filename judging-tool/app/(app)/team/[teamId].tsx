@@ -8,8 +8,7 @@ import {
   Text,
   TextInput,
   View,
-  findNodeHandle,
-  UIManager,
+  LayoutChangeEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -215,18 +214,15 @@ type RubricSliderProps = {
 
 function RubricSlider({ value, max, criterionId, onChange }: RubricSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
-  const [trackX, setTrackX] = useState(0);
-  const trackRef = useState<View | null>(null)[0];
 
   const handleGesture = useCallback(
-    (absoluteX: number) => {
+    (relativeX: number) => {
       if (!max || !trackWidth) return;
-      const relativeX = absoluteX - trackX;
       const ratio = Math.min(Math.max(relativeX / trackWidth, 0), 1);
       const rounded = Math.round(ratio * max);
       onChange(criterionId, rounded);
     },
-    [trackX, trackWidth, max, criterionId, onChange],
+    [trackWidth, max, criterionId, onChange],
   );
 
   const panResponder = useReactMemo(
@@ -234,11 +230,11 @@ function RubricSlider({ value, max, criterionId, onChange }: RubricSliderProps) 
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: (evt, gestureState) => {
-          handleGesture(gestureState.x0);
+        onPanResponderGrant: (evt) => {
+          handleGesture(evt.nativeEvent.locationX);
         },
-        onPanResponderMove: (evt, gestureState) => {
-          handleGesture(gestureState.moveX);
+        onPanResponderMove: (evt) => {
+          handleGesture(evt.nativeEvent.locationX);
         },
       }),
     [handleGesture],
@@ -247,21 +243,14 @@ function RubricSlider({ value, max, criterionId, onChange }: RubricSliderProps) 
   const percentage = max ? (value / max) * 100 : 0;
   const midpoint = Math.round(max / 2);
 
-  const handleLayout = useCallback((ref: View | null) => {
-    if (ref) {
-      const handle = findNodeHandle(ref);
-      if (handle) {
-        UIManager.measure(handle, (_x, _y, width, _height, pageX) => {
-          setTrackWidth(width);
-          setTrackX(pageX);
-        });
-      }
-    }
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    setTrackWidth(width);
   }, []);
 
   return (
     <View style={styles.sliderContainer}>
-      <View ref={handleLayout} style={styles.sliderTrack} {...panResponder.panHandlers}>
+      <View onLayout={handleLayout} style={styles.sliderTrack} {...panResponder.panHandlers}>
         <View style={[styles.sliderFill, { width: `${percentage}%` }]} />
         <View style={[styles.sliderThumb, { left: `${percentage}%` }]} />
       </View>
