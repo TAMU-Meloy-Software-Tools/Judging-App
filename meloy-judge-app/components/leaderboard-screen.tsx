@@ -89,19 +89,19 @@ const criteriaLabels = {
 export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-card/80 backdrop-blur-sm shadow-sm">
+      <header className="border-b bg-primary backdrop-blur-sm shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-primary/10">
+            <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
-                <Trophy className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
+                <Trophy className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Leaderboard</h1>
-                <p className="text-sm text-muted-foreground">Aggies Invent Spring 2025</p>
+                <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
+                <p className="text-sm text-white/80">Aggies Invent Spring 2025</p>
               </div>
             </div>
           </div>

@@ -94,61 +94,58 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-card/80 backdrop-blur-sm shadow-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
+      <header className="border-b bg-primary backdrop-blur-sm shadow-lg">
+        <div className="mx-auto flex max-w-7xl items-center justify-between p-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-primary/10">
-              <ArrowLeft className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20 h-12 w-12">
+              <ArrowLeft className="h-6 w-6" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">{mockTeam.name}</h1>
-              <p className="text-sm text-muted-foreground">Table {mockTeam.tableNumber}</p>
+              <h1 className="text-3xl font-bold text-white">{mockTeam.name}</h1>
+              <p className="text-base text-white/80">Table {mockTeam.tableNumber}</p>
             </div>
           </div>
-          <Badge
-            variant="secondary"
-            className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-xl px-5 py-2 shadow-lg"
-          >
+          <Badge variant="secondary" className="bg-white text-primary text-2xl px-6 py-3 shadow-lg font-bold">
             {totalScore}/{maxTotalScore}
           </Badge>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl p-4">
-        <Card className="mb-6 border-2 shadow-md">
+      <main className="mx-auto max-w-4xl p-6">
+        <Card className="mb-8 border-2 shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl">{mockTeam.projectTitle}</CardTitle>
-            <CardDescription className="flex items-center gap-2 text-sm">
-              <Users className="h-4 w-4" />
+            <CardTitle className="text-2xl">{mockTeam.projectTitle}</CardTitle>
+            <CardDescription className="flex items-center gap-2 text-base mt-2">
+              <Users className="h-5 w-5" />
               {mockTeam.members.join(", ")}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground leading-relaxed">{mockTeam.description}</p>
+            <p className="text-muted-foreground leading-relaxed text-lg">{mockTeam.description}</p>
           </CardContent>
         </Card>
 
-        <div className="mb-6">
-          <h2 className="mb-4 text-2xl font-bold text-foreground">Grading Criteria</h2>
-          <div className="space-y-4">
+        <div className="mb-8">
+          <h2 className="mb-6 text-3xl font-bold text-foreground">Grading Criteria</h2>
+          <div className="space-y-6">
             {gradingCriteria.map((criteria) => {
               const Icon = criteria.icon
               return (
                 <Card key={criteria.id} className="border-2 shadow-md hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-1 items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex-shrink-0">
-                          <Icon className="h-5 w-5 text-primary" />
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex flex-1 items-start gap-4">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex-shrink-0">
+                          <Icon className="h-7 w-7 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{criteria.name}</CardTitle>
-                          <CardDescription>{criteria.description}</CardDescription>
+                          <CardTitle className="text-xl mb-2">{criteria.name}</CardTitle>
+                          <CardDescription className="text-base">{criteria.description}</CardDescription>
                         </div>
                       </div>
                       <Badge
                         variant="outline"
-                        className={`ml-4 text-lg px-4 py-1.5 font-bold border-2 ${
+                        className={`ml-4 text-2xl px-5 py-2 font-bold border-2 ${
                           scores[criteria.id] >= criteria.maxScore * 0.8
                             ? "border-success/50 bg-success/10 text-success"
                             : scores[criteria.id] >= criteria.maxScore * 0.5
@@ -161,15 +158,15 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Slider
                         value={[scores[criteria.id]]}
                         onValueChange={(value) => handleScoreChange(criteria.id, value)}
                         max={criteria.maxScore}
                         step={1}
-                        className="w-full"
+                        className="w-full h-8"
                       />
-                      <div className="flex justify-between text-xs text-muted-foreground font-medium">
+                      <div className="flex justify-between text-base text-muted-foreground font-medium">
                         <span>0</span>
                         <span>{criteria.maxScore}</span>
                       </div>
@@ -181,28 +178,28 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
           </div>
         </div>
 
-        <Card className="mb-6 border-2 shadow-md">
+        <Card className="mb-8 border-2 shadow-md">
           <CardHeader>
-            <CardTitle>Additional Comments</CardTitle>
-            <CardDescription>Provide feedback and notes for the team</CardDescription>
+            <CardTitle className="text-2xl">Additional Comments</CardTitle>
+            <CardDescription className="text-base">Provide feedback and notes for the team</CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
               placeholder="Enter your comments here..."
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              rows={6}
-              className="w-full"
+              rows={8}
+              className="w-full text-lg"
             />
           </CardContent>
         </Card>
 
         <div className="flex gap-4">
-          <Button variant="outline" onClick={onBack} className="flex-1 bg-transparent border-2">
+          <Button variant="outline" onClick={onBack} className="flex-1 bg-transparent border-2 h-14 text-lg">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSaving} className="flex-1 shadow-md">
-            <Save className="mr-2 h-4 w-4" />
+          <Button onClick={handleSubmit} disabled={isSaving} className="flex-1 shadow-md h-14 text-lg">
+            <Save className="mr-2 h-5 w-5" />
             {isSaving ? "Saving..." : "Submit Grades"}
           </Button>
         </div>

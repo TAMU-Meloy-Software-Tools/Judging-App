@@ -148,6 +148,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    /* Increased base font size for better tablet readability */
+    @apply bg-background text-foreground text-lg;
   }
 }

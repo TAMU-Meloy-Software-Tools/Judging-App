@@ -30,15 +30,15 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-card/80 backdrop-blur-sm shadow-sm">
+      <header className="border-b bg-primary backdrop-blur-sm shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between p-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-primary/10">
+            <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
-              <p className="text-sm text-muted-foreground">Manage events, judges, and teams</p>
+              <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+              <p className="text-sm text-white/80">Manage events, judges, and teams</p>
             </div>
           </div>
         </div>
