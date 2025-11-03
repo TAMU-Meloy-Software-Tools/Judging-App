@@ -1,12 +1,14 @@
 "use client"
 
+import Image from "next/image"
 import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Users, Lightbulb, Code2, Target, Presentation, UsersRound, Save } from "lucide-react"
+import { ArrowLeft, Users, Megaphone, BadgeDollarSign, Presentation, Sparkles, Save } from "lucide-react"
 
 interface TeamDetailScreenProps {
   teamId: string
@@ -25,41 +27,47 @@ const mockTeam = {
 
 const gradingCriteria = [
   {
-    id: "innovation",
-    name: "Innovation & Creativity",
-    description: "Originality of the idea and creative approach to problem-solving",
-    maxScore: 20,
-    icon: Lightbulb,
+    id: "communication",
+    name: "Effective Communication",
+    description: "Was the problem urgent, the solution convincing, and the impact tangible?",
+    maxScore: 25,
+    icon: Megaphone,
+    question:
+      "Could you comfortably restate their problem, solution, and impact in one sentence after the presentation?",
   },
   {
-    id: "technical",
-    name: "Technical Implementation",
-    description: "Quality of execution, use of technology, and technical complexity",
-    maxScore: 20,
-    icon: Code2,
-  },
-  {
-    id: "impact",
-    name: "Impact & Feasibility",
-    description: "Potential real-world impact and practicality of implementation",
-    maxScore: 20,
-    icon: Target,
+    id: "funding",
+    name: "Would Fund/Buy Solution",
+    description: "Consider technical feasibility, commercial viability, and novelty of the approach.",
+    maxScore: 25,
+    icon: BadgeDollarSign,
+    question:
+      "Would you feel confident recommending budget or resources to advance this solution given what you heard?",
   },
   {
     id: "presentation",
-    name: "Presentation Quality",
-    description: "Clarity of communication, demo quality, and team engagement",
-    maxScore: 20,
+    name: "Presentation",
+    description: "Evaluate the demo assets, storytelling, and overall delivery.",
+    maxScore: 25,
     icon: Presentation,
+    question: "Did the video, prototype, and slides collectively keep you engaged and build trust in the idea?",
   },
   {
-    id: "teamwork",
-    name: "Teamwork & Collaboration",
-    description: "Evidence of effective collaboration and division of work",
-    maxScore: 20,
-    icon: UsersRound,
+    id: "overall",
+    name: "Overall",
+    description: "Reflect on the pitch strength, Q&A performance, and your gut confidence.",
+    maxScore: 25,
+    icon: Sparkles,
+    question: "Do you leave the table feeling inspired to see this team advance to the next stage?",
   },
-]
+] satisfies Array<{
+  id: string
+  name: string
+  description: string
+  maxScore: number
+  icon: typeof Megaphone
+  question: string
+}>
 
 export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
   const [scores, setScores] = useState<Record<string, number>>(
@@ -71,6 +79,7 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
       {},
     ),
   )
+  const [reflections, setReflections] = useState<Record<string, string>>({})
   const [comments, setComments] = useState("")
   const [isSaving, setIsSaving] = useState(false)
 
@@ -86,119 +95,164 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
 
   const handleSubmit = async () => {
     setIsSaving(true)
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSaving(false)
     onBack()
   }
 
+  const handleReflectionChange = (criteriaId: string, value: string) => {
+    setReflections((prev) => ({
+      ...prev,
+      [criteriaId]: value,
+    }))
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="border-b bg-primary backdrop-blur-sm shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between p-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={onBack} className="text-white hover:bg-white/20 h-12 w-12">
-              <ArrowLeft className="h-6 w-6" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-white">{mockTeam.name}</h1>
-              <p className="text-base text-white/80">Table {mockTeam.tableNumber}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/20"
+                aria-label="Back to event"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-auto items-center justify-center rounded-xl border border-white/25 bg-white/15 p-2 shadow-md backdrop-blur-md">
+                  <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={120} height={50} className="object-contain" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">Team review</p>
+                  <h1 className="text-3xl font-semibold text-white sm:text-[2.25rem]">{mockTeam.name}</h1>
+                  <p className="text-sm text-white/80">Table {mockTeam.tableNumber}</p>
+                </div>
+              </div>
+            </div>
+            <Badge className="flex flex-col items-start gap-1 rounded-full border border-white/40 bg-white/20 px-5 py-3 text-base font-semibold text-white sm:flex-row sm:items-center sm:gap-3">
+              <span>Total Score {totalScore}/{maxTotalScore}</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70 sm:text-[0.65rem]">Team {teamId}</span>
+            </Badge>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-white/25 bg-white/10 px-6 py-4 text-white/90">
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/60">Project</p>
+              <p className="text-lg font-semibold text-white">{mockTeam.projectTitle}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/60">Team</p>
+              <div className="flex items-center gap-2 text-sm text-white/85">
+                <Users className="h-4 w-4" />
+                <span>{mockTeam.members.join(", ")}</span>
+              </div>
             </div>
           </div>
-          <Badge variant="secondary" className="bg-white text-primary text-2xl px-6 py-3 shadow-lg font-bold">
-            {totalScore}/{maxTotalScore}
-          </Badge>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl p-6">
-        <Card className="mb-8 border-2 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">{mockTeam.projectTitle}</CardTitle>
-            <CardDescription className="flex items-center gap-2 text-base mt-2">
-              <Users className="h-5 w-5" />
-              {mockTeam.members.join(", ")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground leading-relaxed text-lg">{mockTeam.description}</p>
-          </CardContent>
-        </Card>
+      <main className="relative mx-auto max-w-5xl px-6 py-12 md:py-16">
+        <section className="space-y-8">
+          <div>
+            <h2 className="text-3xl font-semibold text-slate-900">Judging Rubric</h2>
+            <p className="mt-2 text-base text-slate-500">
+              Score each pillar out of 25 points. The guiding question under every slider helps you validate the score with
+              the official rubric.
+            </p>
+          </div>
 
-        <div className="mb-8">
-          <h2 className="mb-6 text-3xl font-bold text-foreground">Grading Criteria</h2>
           <div className="space-y-6">
             {gradingCriteria.map((criteria) => {
               const Icon = criteria.icon
+              const score = scores[criteria.id]
+
               return (
-                <Card key={criteria.id} className="border-2 shadow-md hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between gap-4">
+                <Card key={criteria.id} className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-md transition-all hover:-translate-y-[2px] hover:shadow-xl">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
+                  <CardHeader className="flex flex-col gap-4 p-6 pb-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
                       <div className="flex flex-1 items-start gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex-shrink-0">
+                        <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
                           <Icon className="h-7 w-7 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-xl mb-2">{criteria.name}</CardTitle>
-                          <CardDescription className="text-base">{criteria.description}</CardDescription>
+                        </span>
+                        <div className="space-y-1">
+                          <CardTitle className="text-xl font-semibold text-slate-900">{criteria.name}</CardTitle>
+                          <CardDescription className="text-base text-slate-600">{criteria.description}</CardDescription>
                         </div>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={`ml-4 text-2xl px-5 py-2 font-bold border-2 ${
-                          scores[criteria.id] >= criteria.maxScore * 0.8
-                            ? "border-success/50 bg-success/10 text-success"
-                            : scores[criteria.id] >= criteria.maxScore * 0.5
-                              ? "border-primary/50 bg-primary/10 text-primary"
-                              : "border-border"
-                        }`}
-                      >
-                        {scores[criteria.id]}/{criteria.maxScore}
+                      <Badge className="rounded-full bg-primary/10 px-4 py-2 text-base font-semibold text-primary shadow-sm">
+                        {score}/{criteria.maxScore}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4 px-6 pb-6">
                     <div className="space-y-3">
                       <Slider
-                        value={[scores[criteria.id]]}
+                        value={[score]}
                         onValueChange={(value) => handleScoreChange(criteria.id, value)}
                         max={criteria.maxScore}
                         step={1}
-                        className="w-full h-8"
+                        className="w-full"
+                        aria-label={`${criteria.name} score`}
                       />
-                      <div className="flex justify-between text-base text-muted-foreground font-medium">
+                      <div className="flex justify-between text-sm font-medium text-slate-500">
                         <span>0</span>
                         <span>{criteria.maxScore}</span>
                       </div>
+                    </div>
+                    <div className="space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/70 px-4 py-3">
+                      <p className="text-sm font-semibold text-slate-600">{criteria.question}</p>
+                      <Textarea
+                        value={reflections[criteria.id] ?? ""}
+                        onChange={(event) => handleReflectionChange(criteria.id, event.target.value)}
+                        placeholder="Jot quick notes here..."
+                        rows={3}
+                        className="text-sm"
+                      />
                     </div>
                   </CardContent>
                 </Card>
               )
             })}
           </div>
-        </div>
+        </section>
 
-        <Card className="mb-8 border-2 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-2xl">Additional Comments</CardTitle>
-            <CardDescription className="text-base">Provide feedback and notes for the team</CardDescription>
+        <Card className="mt-12 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-lg">
+          <div className="h-1 w-full bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
+          <CardHeader className="p-8 pb-4">
+            <CardTitle className="text-2xl font-semibold text-slate-900">Additional Comments</CardTitle>
+            <CardDescription className="mt-2 text-base text-slate-600">
+              Share any observations, coaching advice, or highlights for the organizing team.
+            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8 pt-4">
             <Textarea
-              placeholder="Enter your comments here..."
+              placeholder="Enter your feedback..."
               value={comments}
-              onChange={(e) => setComments(e.target.value)}
-              rows={8}
-              className="w-full text-lg"
+              onChange={(event) => setComments(event.target.value)}
+              rows={6}
+              className="text-base"
             />
           </CardContent>
         </Card>
 
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={onBack} className="flex-1 bg-transparent border-2 h-14 text-lg">
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="h-14 flex-1 rounded-xl border-2 border-slate-300 text-base font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isSaving} className="flex-1 shadow-md h-14 text-lg">
+          <Button
+            onClick={handleSubmit}
+            disabled={isSaving}
+            className="h-14 flex-1 rounded-xl bg-primary text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl disabled:opacity-70"
+          >
             <Save className="mr-2 h-5 w-5" />
             {isSaving ? "Saving..." : "Submit Grades"}
           </Button>

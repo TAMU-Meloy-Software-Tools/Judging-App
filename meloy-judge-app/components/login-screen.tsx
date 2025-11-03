@@ -25,100 +25,148 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-primary to-[#3d0000] p-4">
-      <Card className="w-full max-w-lg shadow-2xl rounded-2xl">
-        <CardHeader className="text-center p-8">
-          <div className="mx-auto">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-primary to-[#3d0000] p-6">
+      <Card className="relative w-full max-w-xl overflow-hidden rounded-[28px] border-2 border-white/40 bg-white/90 shadow-2xl backdrop-blur">
+        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-100 opacity-90" />
+        <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-[#3d0000]/20 blur-3xl" />
+
+        <div className="relative">
+          <CardHeader className="px-10 pt-12 pb-6 text-center">
             <Image
               src="/apptitle.png"
               alt="Meloy Program Judging Portal"
-              width={280}
-              height={134}
-              className="object-contain"
-              style={{ filter: 'brightness(0) saturate(100%) invert(10%) sepia(90%) saturate(5000%) hue-rotate(340deg) brightness(60%) contrast(110%)' }}
+              width={260}
+              height={120}
+              className="mx-auto object-contain"
+              style={{
+                filter:
+                  "brightness(0) saturate(100%) invert(10%) sepia(90%) saturate(5000%) hue-rotate(340deg) brightness(60%) contrast(110%)",
+              }}
             />
-          </div>
-        </CardHeader>
-        <CardContent className="p-8 pt-0">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-11 bg-muted p-1 rounded-full">
-              <TabsTrigger value="login" className="text-base rounded-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all duration-300">Login</TabsTrigger>
-              <TabsTrigger value="signup" className="text-base rounded-full data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all duration-300">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login" className="mt-6">
-              <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="judge@tamu.edu"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="h-12 text-base bg-input/80"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-12 text-base bg-input/80"
-                  />
-                </div>
-                <div className="pt-4">
-                  <Button type="submit" className="w-full h-12 text-lg font-bold shadow-lg bg-primary hover:bg-primary/90 transition-all duration-300 ease-in-out hover:scale-105">
-                    <CheckCircle2 className="mr-2 h-5 w-5" />
-                    Login as Judge
-                  </Button>
-                </div>
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
+          </CardHeader>
+          <CardContent className="relative px-10 pb-10">
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid h-12 w-full grid-cols-2 rounded-full border border-slate-200 bg-white/80 p-1 shadow-inner backdrop-blur">
+                <TabsTrigger
+                  value="login"
+                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
+                >
+                  Login
+                </TabsTrigger>
+                <TabsTrigger
+                  value="signup"
+                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
+                >
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login" className="mt-8">
+                <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="judge@tamu.edu"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-white/90 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                    />
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Password
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-white/90 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                    />
+                  </div>
+                  <div className="pt-2">
+                    <Button
+                      type="submit"
+                      className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+                    >
+                      <CheckCircle2 className="mr-2 h-5 w-5" />
+                      Login as Judge
+                    </Button>
+                  </div>
+                  <div className="relative flex items-center justify-center py-2">
+                    <span className="h-px w-full bg-slate-200" />
+                    <span className="absolute bg-white px-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                       Or
                     </span>
                   </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 text-base font-semibold border-border/80 hover:bg-muted/80 transition-all duration-300 ease-in-out hover:scale-105"
-                  onClick={(e) => handleSubmit(e, true)}
-                >
-                  Login as Admin
-                </Button>
-              </form>
-            </TabsContent>
-            <TabsContent value="signup" className="mt-6">
-              <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name" className="text-sm font-medium">Full Name</Label>
-                  <Input id="signup-name" type="text" placeholder="John Doe" required className="h-12 text-base bg-input/80" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-sm font-medium">Email</Label>
-                  <Input id="signup-email" type="email" placeholder="judge@tamu.edu" required className="h-12 text-base bg-input/80" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-sm font-medium">Password</Label>
-                  <Input id="signup-password" type="password" required className="h-12 text-base bg-input/80" />
-                </div>
-                <div className="pt-4">
-                  <Button type="submit" className="w-full h-12 text-lg font-bold shadow-lg bg-primary hover:bg-primary/90 transition-all duration-300 ease-in-out hover:scale-105">
-                    Create Account
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex h-12 w-full items-center justify-center rounded-xl border-slate-200 text-base font-semibold text-slate-600 transition-transform hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+                    onClick={(e) => handleSubmit(e, true)}
+                  >
+                    Login as Admin
                   </Button>
-                </div>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup" className="mt-8">
+                <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name" className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Full name
+                    </Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="John Doe"
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-white/90 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Email
+                    </Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="judge@tamu.edu"
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-white/90 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">
+                      Password
+                    </Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      required
+                      className="h-12 rounded-xl border-slate-200 bg-white/90 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                    />
+                  </div>
+                  <div className="pt-2">
+                    <Button
+                      type="submit"
+                      className="flex h-12 w-full items-center justify-center rounded-xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+                    >
+                      Create Account
+                    </Button>
+                  </div>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </div>
       </Card>
     </div>
   )

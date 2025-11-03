@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -37,115 +38,150 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
   const [email, setEmail] = useState("sjohnson@tamu.edu")
 
   const handleSaveChanges = () => {
-    // In a real app, you'd save the data to your backend here.
     toast.success("Profile updated successfully!")
   }
 
   const handleUpdatePassword = () => {
-    // Password update logic would go here.
     toast.success("Password updated successfully!")
   }
 
   const handleDeleteAccount = () => {
-    // Account deletion logic would go here.
     toast.error("Account has been deleted.")
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
       <Toaster richColors position="top-center" />
-      {/* Updated header to match dashboard tablet design and scale up sizes */}
-      <header className="relative border-b bg-gradient-to-b from-primary to-[#3d0000] backdrop-blur-sm shadow-xl overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-8 md:px-8">
-          <div className="flex items-center gap-5">
-            <Button variant="ghost" onClick={onBack} className="text-white hover:bg-white/20 h-11 w-11 p-2 flex items-center justify-center">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
 
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-auto items-center justify-center rounded-xl bg-white/15 backdrop-blur-md shadow-md p-2 border border-white/25">
-                <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={130} height={60} className="object-contain" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-semibold text-white sm:text-[2.25rem] md:text-[2.5rem]">Settings</h1>
-                <p className="text-sm text-white/90">Manage your account & preferences</p>
+      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
+        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="flex items-center gap-5">
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-auto items-center justify-center rounded-xl border border-white/25 bg-white/15 p-2 shadow-md backdrop-blur-md">
+                  <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={130} height={60} className="object-contain" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-semibold text-white sm:text-[2.25rem] md:text-[2.5rem]">Settings Hub</h1>
+                  <p className="text-sm text-white/85">Tune your profile, credentials, and account controls.</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button onClick={onLogout} className="h-11 px-5 text-base font-medium bg-white text-primary hover:bg-white/90 shadow-md">
+            <Button onClick={onLogout} className="h-11 rounded-xl bg-white px-5 text-base font-semibold text-primary shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white/95">
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/20 bg-white/10 px-6 py-4 text-white/90">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Signed in as</p>
+              <p className="mt-1 text-2xl font-semibold text-white">{name}</p>
+            </div>
+            <Badge variant="secondary" className="rounded-full border border-white/40 bg-white/20 px-4 py-2 text-sm font-medium text-white">
+              {email}
+            </Badge>
           </div>
         </div>
       </header>
 
       <main className="relative mx-auto max-w-7xl px-6 py-12 md:py-16">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList
-            className="grid w-full grid-cols-3 h-14 p-2 bg-slate-200/80 backdrop-blur-sm rounded-2xl border border-slate-300 ring-1 ring-primary/50 hover:ring-primary/70 transition-all duration-300 shadow-md">
-          <TabsTrigger
-            value="profile"
-            className="
-              h-full text-base rounded-xl transition-all duration-300
-              data-[state=active]:border-1 data-[state=active]:border-primary 
-              data-[state=active]:ring-0 data-[state=active]:ring-primary/30 
-              data-[state=active]:bg-white data-[state=active]:text-primary">
-            <User className="mr-2 h-5 w-5" /> Profile
-          </TabsTrigger>
-
-            <TabsTrigger value="security" className="h-full text-base rounded-xl transition-all duration-300
-              data-[state=active]:border-1 data-[state=active]:border-primary 
-              data-[state=active]:ring-0 data-[state=active]:ring-primary/30 
-              data-[state=active]:bg-white data-[state=active]:text-primary">
-              <Lock className="mr-2 h-5 w-5" /> Security
+          <TabsList className="grid h-16 w-full grid-cols-3 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-lg backdrop-blur">
+            <TabsTrigger
+              value="profile"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+            >
+              <User className="mr-2 h-5 w-5" />
+              Profile
             </TabsTrigger>
-            <TabsTrigger value="account" className="h-full text-base rounded-xl transition-all duration-300
-              data-[state=active]:border-1 data-[state=active]:border-primary 
-              data-[state=active]:ring-0 data-[state=active]:ring-primary/30 
-              data-[state=active]:bg-white data-[state=active]:text-primary">
-              <AlertTriangle className="mr-2 h-5 w-5" /> Account
+            <TabsTrigger
+              value="security"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+            >
+              <Lock className="mr-2 h-5 w-5" />
+              Security
+            </TabsTrigger>
+            <TabsTrigger
+              value="account"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+            >
+              <AlertTriangle className="mr-2 h-5 w-5" />
+              Account
             </TabsTrigger>
           </TabsList>
-          
-          <div className="mt-6">
+
+          <div className="mt-10 space-y-10">
             <TabsContent value="profile">
-              <Card className="rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-sm shadow-lg">
-                <CardHeader className="px-8 pt-8 pb-6">
-                  <CardTitle className="text-2xl font-semibold">Profile Information</CardTitle>
-                  <CardDescription>Update your personal details and profile picture.</CardDescription>
+              <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300" />
+                <CardHeader className="relative px-8 pt-8 pb-6">
+                  <CardTitle className="text-2xl font-semibold text-slate-900">Profile Information</CardTitle>
+                  <CardDescription className="text-base text-slate-600">Update your personal details and profile picture.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center gap-8 px-8 pb-8 sm:flex-row sm:items-start">
-                  <div className="relative group shrink-0">
-                    <Image
-                      src="/placeholder-user.jpg"
-                      alt="User profile picture"
-                      width={148}
-                      height={148}
-                      className="rounded-full border-4 border-white shadow-lg group-hover:opacity-90 transition-opacity"
-                    />
-                    <Button variant="outline" size="icon" className="absolute bottom-1 right-1 h-10 w-10 rounded-full bg-white/80 backdrop-blur-sm group-hover:bg-white transition-colors shadow-md">
-                      <Camera className="h-5 w-5" />
-                      <span className="sr-only">Change picture</span>
-                    </Button>
+                <CardContent className="flex flex-col gap-8 px-8 pb-8 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex flex-col items-center gap-4 lg:w-72">
+                    <div className="relative">
+                      <Image
+                        src="/placeholder-user.jpg"
+                        alt="User profile picture"
+                        width={160}
+                        height={160}
+                        className="h-40 w-40 rounded-full border-4 border-white object-cover shadow-2xl"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="absolute bottom-3 right-3 h-11 w-11 rounded-full border-white/60 bg-white/80 text-slate-700 backdrop-blur-sm transition-transform hover:-translate-y-0.5 hover:bg-white"
+                      >
+                        <Camera className="h-5 w-5" />
+                        <span className="sr-only">Change picture</span>
+                      </Button>
+                    </div>
+                    <p className="text-center text-sm text-slate-500">
+                      Use a square image for best results on tablets and large displays.
+                    </p>
                   </div>
-                  <div className="grid gap-6 w-full flex-1">
-                    <div className="grid sm:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <Label htmlFor="name" className="text-base">Full Name</Label>
-                        <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="h-12 px-4 text-base" />
+                  <div className="flex-1 space-y-6">
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          Full name
+                        </Label>
+                        <Input
+                          id="name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="h-12 rounded-xl border-slate-200 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                        />
                       </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="email" className="text-base">Email Address</Label>
-                        <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 px-4 text-base" />
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          Email address
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="h-12 rounded-xl border-slate-200 px-4 text-base shadow-inner focus-visible:border-primary/60"
+                        />
                       </div>
                     </div>
-                    <Button onClick={handleSaveChanges} className="h-12 w-full px-6 text-base shadow-md">
+                    <Button
+                      onClick={handleSaveChanges}
+                      className="h-12 w-full rounded-xl bg-primary px-6 text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
+                    >
                       <Save className="mr-2 h-5 w-5" />
-                      Save Changes
+                      Save changes
                     </Button>
                   </div>
                 </CardContent>
@@ -153,51 +189,65 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
             </TabsContent>
 
             <TabsContent value="security">
-              <Card className="rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-sm shadow-lg">
-                <CardHeader className="px-8 pt-8 pb-6">
-                  <CardTitle className="text-2xl font-semibold">Security</CardTitle>
-                  <CardDescription>Manage your password and security settings.</CardDescription>
+              <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-blue-500" />
+                <CardHeader className="relative px-8 pt-8 pb-6">
+                  <CardTitle className="text-2xl font-semibold text-slate-900">Security</CardTitle>
+                  <CardDescription className="text-base text-slate-600">Manage your password and security settings.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-6 px-8 pb-8 max-w-2xl mx-auto">
-                  <div className="space-y-3">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input id="current-password" type="password" className="h-12 px-4 text-base" />
+                <CardContent className="mx-auto grid max-w-3xl gap-6 px-8 pb-8">
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Current password
+                    </Label>
+                    <Input id="current-password" type="password" className="h-12 rounded-xl border-slate-200 px-4 text-base shadow-inner focus-visible:border-primary/60" />
                   </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input id="new-password" type="password" className="h-12 px-4 text-base" />
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      New password
+                    </Label>
+                    <Input id="new-password" type="password" className="h-12 rounded-xl border-slate-200 px-4 text-base shadow-inner focus-visible:border-primary/60" />
                   </div>
-                  <div className="space-y-3">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input id="confirm-password" type="password" className="h-12 px-4 text-base" />
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Confirm new password
+                    </Label>
+                    <Input id="confirm-password" type="password" className="h-12 rounded-xl border-slate-200 px-4 text-base shadow-inner focus-visible:border-primary/60" />
                   </div>
-                  <Button onClick={handleUpdatePassword} className="h-12 w-full px-6 text-base shadow-md">
+                  <Button
+                    onClick={handleUpdatePassword}
+                    className="h-12 w-full rounded-xl bg-primary px-6 text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
+                  >
                     <Save className="mr-2 h-5 w-5" />
-                    Update Password
+                    Update password
                   </Button>
                 </CardContent>
               </Card>
             </TabsContent>
 
-                        <TabsContent value="account">
-              <Card className="rounded-3xl border-2 border-destructive/60 bg-destructive/5 backdrop-blur-sm shadow-lg">
-                <CardHeader className="px-8 pt-8 pb-6">
-                  <CardTitle className="text-2xl font-semibold text-destructive flex items-center gap-3">
-                    <AlertTriangle /> Account Management
+            <TabsContent value="account">
+              <Card className="relative overflow-hidden rounded-3xl border border-destructive/40 bg-gradient-to-br from-destructive/10 via-white to-white shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-400 via-destructive to-orange-300" />
+                <CardHeader className="relative px-8 pt-8 pb-6">
+                  <CardTitle className="flex items-center gap-3 text-2xl font-semibold text-destructive">
+                    <AlertTriangle className="h-6 w-6" />
+                    Account management
                   </CardTitle>
-                  <CardDescription className="text-destructive/80">Manage settings related to your account, including irreversible actions.</CardDescription>
+                  <CardDescription className="text-base text-destructive/80">
+                    Manage settings related to your account, including irreversible actions.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="px-8 pb-8 max-w-2xl mx-auto">
-                  <div className="rounded-xl border border-destructive/30 p-6 flex items-center justify-between">
+                <CardContent className="mx-auto max-w-3xl px-8 pb-8">
+                  <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-destructive/30 bg-white/70 px-6 py-6">
                     <div>
-                      <h3 className="font-bold text-lg text-destructive">Delete this account</h3>
-                      <p className="text-destructive/90">Once you delete your account, there is no going back.</p>
+                      <h3 className="text-lg font-semibold text-destructive">Delete this account</h3>
+                      <p className="text-sm text-destructive/80">Once you delete your account, there is no going back.</p>
                     </div>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="h-11 px-6 text-base shadow-md shrink-0">
+                        <Button variant="destructive" className="h-11 rounded-xl px-6 text-base font-semibold shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl">
                           <Trash2 className="mr-2 h-5 w-5" />
-                          Delete Account
+                          Delete account
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
