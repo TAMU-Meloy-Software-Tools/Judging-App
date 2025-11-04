@@ -35,9 +35,10 @@ export default function Home() {
   const handleBack = () => {
     if (currentScreen === "team-detail") {
       setCurrentScreen("event-detail")
+    } else if (currentScreen === "leaderboard") {
+      setCurrentScreen("event-detail")
     } else if (
       currentScreen === "event-detail" ||
-      currentScreen === "leaderboard" ||
       currentScreen === "admin" ||
       currentScreen === "settings"
     ) {
