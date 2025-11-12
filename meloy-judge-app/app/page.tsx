@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { LoginScreen } from "@/components/login-screen"
-import { DashboardScreen } from "@/components/dashboard-screen"
-import { EventDetailScreen } from "@/components/event-detail-screen"
-import { TeamDetailScreen } from "@/components/team-detail-screen"
-import { LeaderboardScreen } from "@/components/leaderboard-screen"
-import { AdminScreen } from "@/components/admin-screen"
-import { SettingsScreen } from "@/components/settings-screen"
+import { LoginScreen } from "@/components/authentication/login-screen"
+import { DashboardScreen } from "@/components/dashboard/dashboard-screen"
+import { EventDetailScreen } from "@/components/events/event-detail-screen"
+import { TeamDetailScreen } from "@/components/judging/team-detail-screen"
+import { LeaderboardScreen } from "@/components/events/leaderboard-screen"
+import { AdminScreen } from "@/components/management/admin-screen"
+import { SettingsScreen } from "@/components/settings/settings-screen"
 
 export type Screen = "login" | "dashboard" | "event-detail" | "team-detail" | "leaderboard" | "admin" | "settings"
 

@@ -13,10 +13,10 @@ interface LeaderboardScreenProps {
 }
 
 const rubricOrder = [
-  { key: "communication", label: "Effective Communication" },
+  { key: "communication", label: "Effective Communication", short: "Communication" },
   { key: "funding", label: "Would Fund/Buy", short: "Fund/Buy" },
-  { key: "presentation", label: "Presentation" },
-  { key: "overall", label: "Overall" },
+  { key: "presentation", label: "Presentation", short: "Presentation" },
+  { key: "overall", label: "Overall", short: "Overall" },
 ] as const
 
 const mockLeaderboard = [
@@ -192,7 +192,7 @@ export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
                           return (
                             <div key={criterion.key} className="space-y-1.5">
                               <div className="flex items-center justify-between text-sm font-semibold text-slate-600">
-                                <span>{criterion.short ?? criterion.label}</span>
+                                <span>{criterion.short}</span>
                                 <span>{score}/25</span>
                               </div>
                               <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
