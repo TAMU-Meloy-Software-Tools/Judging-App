@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Aggies Invent - Judge Portal",
   description: "Judging tool for Aggies Invent competitions at Texas A&M",
   generator: "v0.app",
+  icons: {
+    icon: "/TAMUlogo.png",
+  },
 }
 
 export default function RootLayout({
