@@ -92,8 +92,8 @@ export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
   const topThree = teams.slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
-      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-6 py-12 md:px-10">
           <div className="flex flex-wrap items-center justify-between gap-7">
@@ -125,7 +125,7 @@ export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
 
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-primary/5 to-transparent" />
               <CardContent className="relative flex flex-col gap-3 p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-500">Teams scored</p>
                 <p className="text-4xl font-semibold text-slate-900">{gradedTeams}</p>
@@ -164,13 +164,13 @@ export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
                     key={team.rank}
                     className={`relative overflow-hidden rounded-[28px] border ${
                       team.rank === 1
-                        ? "border-yellow-300 bg-gradient-to-br from-yellow-200 via-white to-yellow-100"
+                        ? "border-yellow-300 bg-linear-to-br from-yellow-200 via-white to-yellow-100"
                         : team.rank === 2
-                          ? "border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-100"
-                          : "border-orange-300 bg-gradient-to-br from-orange-200 via-white to-orange-100"
+                          ? "border-slate-300 bg-linear-to-br from-slate-200 via-white to-slate-100"
+                          : "border-orange-300 bg-linear-to-br from-orange-200 via-white to-orange-100"
                     } shadow-lg`}
                   >
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
+                    <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
                     <CardHeader className="flex flex-col gap-3 p-6 pb-4">
                       <div className="flex items-center justify-between">
                         <Badge className="rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-slate-700">
@@ -221,21 +221,21 @@ export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
                 {teams.map((team) => (
                   <Card
                     key={team.rank}
-                    className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-md transition-all hover:-translate-y-[2px] hover:shadow-xl"
+                    className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
                   >
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
+                    <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
                     <CardHeader className="flex flex-col gap-4 p-7 pb-4">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
                           <div
                             className={`flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white ${
                               team.rank === 1
-                                ? "bg-gradient-to-br from-yellow-400 to-yellow-500"
+                                ? "bg-linear-to-br from-yellow-400 to-yellow-500"
                                 : team.rank === 2
-                                  ? "bg-gradient-to-br from-slate-300 to-slate-400"
+                                  ? "bg-linear-to-br from-slate-300 to-slate-400"
                                   : team.rank === 3
-                                    ? "bg-gradient-to-br from-orange-400 to-orange-500"
-                                    : "bg-gradient-to-br from-slate-500 to-slate-600"
+                                    ? "bg-linear-to-br from-orange-400 to-orange-500"
+                                    : "bg-linear-to-br from-slate-500 to-slate-600"
                             }`}
                           >
                             {team.rank === 1 ? (

@@ -25,9 +25,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-primary to-[#3d0000] p-6">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-primary to-[#3d0000] p-6">
       <Card className="relative w-full max-w-xl overflow-hidden rounded-[28px] border-2 border-white/40 bg-white/90 shadow-2xl backdrop-blur">
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-white to-slate-100 opacity-90" />
+        <div className="absolute inset-0 bg-linear-to-br from-white via-white to-slate-100 opacity-90" />
         <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-[#3d0000]/20 blur-3xl" />
 
@@ -50,13 +50,13 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               <TabsList className="grid h-12 w-full grid-cols-2 rounded-full border border-slate-200 bg-white/80 p-1 shadow-inner backdrop-blur">
                 <TabsTrigger
                   value="login"
-                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
+                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
                 >
                   Login
                 </TabsTrigger>
                 <TabsTrigger
                   value="signup"
-                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
+                  className="rounded-full text-base font-semibold text-slate-500 transition-all data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/15 data-[state=active]:to-primary/40 data-[state=active]:text-primary data-[state=active]:shadow"
                 >
                   Sign Up
                 </TabsTrigger>

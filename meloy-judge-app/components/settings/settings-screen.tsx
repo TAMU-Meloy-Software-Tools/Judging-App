@@ -50,10 +50,10 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <Toaster richColors position="top-center" />
 
-      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+      <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-5">
@@ -98,21 +98,21 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
           <TabsList className="grid h-16 w-full grid-cols-3 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-lg backdrop-blur">
             <TabsTrigger
               value="profile"
-              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
             >
               <User className="mr-2 h-5 w-5" />
               Profile
             </TabsTrigger>
             <TabsTrigger
               value="security"
-              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
             >
               <Lock className="mr-2 h-5 w-5" />
               Security
             </TabsTrigger>
             <TabsTrigger
               value="account"
-              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+              className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
             >
               <AlertTriangle className="mr-2 h-5 w-5" />
               Account
@@ -121,8 +121,8 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
 
           <div className="mt-10 space-y-10">
             <TabsContent value="profile">
-              <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-lg">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300" />
+              <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-linear-to-br from-white via-slate-50 to-slate-100 shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300" />
                 <CardHeader className="relative px-8 pt-8 pb-6">
                   <CardTitle className="text-2xl font-semibold text-slate-900">Profile Information</CardTitle>
                   <CardDescription className="text-base text-slate-600">Update your personal details and profile picture.</CardDescription>
@@ -190,7 +190,7 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
 
             <TabsContent value="security">
               <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-lg">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-sky-400 to-blue-500" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-sky-400 to-blue-500" />
                 <CardHeader className="relative px-8 pt-8 pb-6">
                   <CardTitle className="text-2xl font-semibold text-slate-900">Security</CardTitle>
                   <CardDescription className="text-base text-slate-600">Manage your password and security settings.</CardDescription>
@@ -226,8 +226,8 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
             </TabsContent>
 
             <TabsContent value="account">
-              <Card className="relative overflow-hidden rounded-3xl border border-destructive/40 bg-gradient-to-br from-destructive/10 via-white to-white shadow-lg">
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-400 via-destructive to-orange-300" />
+              <Card className="relative overflow-hidden rounded-3xl border border-destructive/40 bg-linear-to-br from-destructive/10 via-white to-white shadow-lg">
+                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-red-400 via-destructive to-orange-300" />
                 <CardHeader className="relative px-8 pt-8 pb-6">
                   <CardTitle className="flex items-center gap-3 text-2xl font-semibold text-destructive">
                     <AlertTriangle className="h-6 w-6" />

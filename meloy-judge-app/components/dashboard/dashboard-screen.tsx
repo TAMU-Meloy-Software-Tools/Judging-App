@@ -42,8 +42,8 @@ const mockEvents = [
 
 export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: DashboardScreenProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
-      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-35" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:flex-row md:items-center md:justify-between md:gap-10 md:px-10">
           <div className="flex flex-1 flex-col gap-6 md:flex-row md:items-center">
@@ -81,7 +81,7 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
       </header>
 
       <main className="relative mx-auto max-w-7xl px-6 py-12 md:px-8 md:py-16">
-        <div className="absolute inset-0 -z-10 rounded-[36px] bg-gradient-to-b from-white via-slate-50 to-primary/10 shadow-[0_24px_80px_rgba(148,163,184,0.25)]" />
+        <div className="absolute inset-0 -z-10 rounded-[36px] bg-linear-to-b from-white via-slate-50 to-primary/10 shadow-[0_24px_80px_rgba(148,163,184,0.25)]" />
 
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
           {mockEvents.map((event, index) => (
@@ -91,7 +91,7 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
               onClick={() => onSelectEvent(event.id)}
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/70 to-primary/50" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-primary/70 to-primary/50" />
 
               <CardHeader className="relative px-6 pb-4 pt-7">
                 <div className="mb-3 flex items-start justify-between gap-3">

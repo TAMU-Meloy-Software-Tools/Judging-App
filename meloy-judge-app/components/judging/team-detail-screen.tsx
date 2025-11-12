@@ -108,8 +108,8 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
-      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-6 py-12 md:px-10">
           <div className="flex flex-wrap items-center justify-between gap-7">
@@ -139,7 +139,7 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
             </Badge>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-6 rounded-[32px] border border-white/25 bg-white/10 px-7 py-5 text-white/90">
+          <div className="flex flex-wrap items-center justify-between gap-6 rounded-4xl border border-white/25 bg-white/10 px-7 py-5 text-white/90">
             <div className="space-y-1.5">
               <p className="text-[0.7rem] uppercase tracking-[0.24em] text-white/60">Project</p>
               <p className="text-xl font-semibold text-white">{mockTeam.projectTitle}</p>
@@ -171,12 +171,12 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
               const score = scores[criteria.id]
 
               return (
-                <Card key={criteria.id} className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-md transition-all hover:-translate-y-[2px] hover:shadow-xl">
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
+                <Card key={criteria.id} className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                  <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
                   <CardHeader className="flex flex-col gap-5 p-7 pb-5">
                     <div className="flex flex-wrap items-start justify-between gap-5">
                       <div className="flex flex-1 items-start gap-4">
-                        <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10">
+                        <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10">
                           <Icon className="h-8 w-8 text-primary" />
                         </span>
                         <div className="space-y-1.5">
@@ -196,7 +196,7 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
                         onValueChange={(value) => handleScoreChange(criteria.id, value)}
                         max={criteria.maxScore}
                         step={1}
-                        className="w-full py-4 [&_[data-slot=slider-track]]:h-2 [&_[data-slot=slider-thumb]]:size-6 sm:[&_[data-slot=slider-track]]:h-2.5 sm:[&_[data-slot=slider-thumb]]:size-8"
+                        className="w-full py-4 **:data-[slot=slider-track]:h-2 **:data-[slot=slider-thumb]:size-6 sm:**:data-[slot=slider-track]:h-2.5 sm:**:data-[slot=slider-thumb]:size-8"
                         aria-label={`${criteria.name} score`}
                       />
                       <div className="flex justify-between text-base font-semibold text-slate-500">
@@ -222,7 +222,7 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
         </section>
 
         <Card className="mt-12 overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-lg">
-          <div className="h-1 w-full bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
+          <div className="h-1 w-full bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
           <CardHeader className="p-8 pb-4">
             <CardTitle className="text-[1.75rem] font-semibold text-slate-900">Additional Comments</CardTitle>
             <CardDescription className="mt-2 text-lg text-slate-600">

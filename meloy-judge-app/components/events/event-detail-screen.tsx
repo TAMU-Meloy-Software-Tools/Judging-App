@@ -74,8 +74,8 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate }:
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
-      <header className="relative overflow-hidden border-b bg-gradient-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:px-8">
           <div className="flex flex-wrap items-center justify-between gap-6">
@@ -133,7 +133,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate }:
       <main className="relative mx-auto max-w-7xl px-6 py-12 md:py-16">
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-lg backdrop-blur-sm">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-primary/5 to-transparent" />
             <CardContent className="relative flex flex-col gap-4 p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Teams graded</p>
               <p className="text-4xl font-semibold text-slate-900">{gradedCount}</p>
@@ -154,7 +154,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate }:
               <span className="text-sm text-slate-500">Queued for judge review</span>
             </CardContent>
           </Card>
-          <Card className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/90 via-primary/80 to-[#3d0000] text-white shadow-xl">
+          <Card className="relative overflow-hidden rounded-3xl border border-primary/20 bg-linear-to-br from-primary/90 via-primary/80 to-[#3d0000] text-white shadow-xl">
             <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-white/10 blur-3xl" />
             <CardContent className="relative flex flex-col gap-4 p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Momentum</p>
@@ -198,7 +198,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate }:
                   }
                 }}
               >
-                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
+                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
                 <CardHeader className="relative flex flex-col gap-3 p-6 pb-4">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>

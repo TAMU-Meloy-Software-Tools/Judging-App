@@ -143,8 +143,8 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
   const upcomingEvent = mockEvents[0]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-primary/5">
-      <header className="relative border-b bg-gradient-to-b from-primary to-[#3d0000] backdrop-blur-sm shadow-xl overflow-hidden">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
+      <header className="relative border-b bg-linear-to-b from-primary to-[#3d0000] backdrop-blur-sm shadow-xl overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
         <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:px-8">
           <div className="flex items-center justify-between">
@@ -184,7 +184,7 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
                 key={metric.id}
                 className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${metric.accent} opacity-70`} />
+                <div className={`absolute inset-0 bg-linear-to-br ${metric.accent} opacity-70`} />
                 <CardContent className="relative flex flex-col gap-6 p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/60 shadow-inner">
@@ -207,33 +207,33 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
         <div className="mt-14 grid gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
           <Tabs defaultValue="events" className="w-full">
             <TabsList className="grid h-16 w-full grid-cols-3 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-lg backdrop-blur">
-              <TabsTrigger
+                            <TabsTrigger
                 value="events"
-                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md"
               >
                 <Calendar className="mr-2 h-5 w-5" />
                 Events
               </TabsTrigger>
               <TabsTrigger
                 value="judges"
-                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md"
               >
                 <UsersRound className="mr-2 h-5 w-5" />
                 Judges
               </TabsTrigger>
               <TabsTrigger
-                value="teams"
-                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/30 data-[state=active]:text-primary data-[state=active]:shadow-md"
+                value="insights"
+                className="flex h-full items-center justify-center rounded-xl border border-transparent text-base font-semibold text-slate-600 transition-all duration-300 data-[state=active]:border-primary/30 data-[state=active]:bg-linear-to-r data-[state=active]:from-primary/10 data-[state=active]:to-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md"
               >
-                <Users className="mr-2 h-5 w-5" />
-                Teams
+                <BarChart3 className="mr-2 h-5 w-5" />
+                Insights
               </TabsTrigger>
             </TabsList>
 
             <div className="mt-10 space-y-10">
               <TabsContent value="events" className="space-y-8">
                 {upcomingEvent && (
-                  <Card className="relative overflow-hidden rounded-3xl border-none bg-gradient-to-br from-primary/95 via-primary/90 to-[#3d0000] text-white shadow-2xl">
+                  <Card className="relative overflow-hidden rounded-3xl border-none bg-linear-to-br from-primary/95 via-primary/90 to-[#3d0000] text-white shadow-2xl">
                     <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full border border-white/10 bg-white/10 blur-2xl" />
                     <CardHeader className="relative p-8 pb-6">
                       <Badge className="w-fit rounded-full border border-white/20 bg-white/15 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white">
@@ -317,8 +317,8 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
                         key={event.id}
                         className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
                       >
-                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
-                        <CardHeader className="p-6 pb-4">
+                        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
+                        <CardHeader className="px-6 pb-4 pt-6">
                           <div className="flex items-start justify-between gap-4">
                             <div>
                               <CardTitle className="text-2xl font-semibold text-slate-800 group-hover:text-primary transition-colors">
@@ -371,7 +371,7 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
               </TabsContent>
 
               <TabsContent value="judges" className="space-y-8">
-                <Card className="overflow-hidden rounded-3xl border-none bg-gradient-to-br from-[#2b295f] via-[#513b8a] to-[#7c2d7c] text-white shadow-2xl">
+                <Card className="overflow-hidden rounded-3xl border-none bg-linear-to-br from-[#2b295f] via-[#513b8a] to-[#7c2d7c] text-white shadow-2xl">
                   <CardHeader className="p-8 pb-6">
                     <CardTitle className="flex items-center gap-3 text-2xl font-semibold">
                       <Mail className="h-6 w-6" />
@@ -459,8 +459,8 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
               </TabsContent>
 
               <TabsContent value="teams" className="space-y-8">
-                <div className="grid gap-8 lg:grid-cols-2">
-                  <Card className="rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-lg">
+                <div className="grid gap-6 md:grid-cols-3">
+                  <Card className="rounded-3xl border border-slate-200/70 bg-linear-to-br from-white via-slate-50 to-slate-100 shadow-lg">
                     <CardHeader className="p-8 pb-6">
                       <CardTitle className="flex items-center gap-3 text-2xl font-semibold text-slate-900">
                         <Plus className="h-6 w-6 text-primary" />
@@ -522,7 +522,7 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
                   </Card>
                 </div>
 
-                <Card className="overflow-hidden rounded-3xl border-none bg-gradient-to-br from-amber-200 via-rose-100 to-white shadow-xl">
+                <Card className="overflow-hidden rounded-3xl border-none bg-linear-to-br from-amber-200 via-rose-100 to-white shadow-xl">
                   <CardHeader className="p-8 pb-4">
                     <CardTitle className="flex items-center gap-3 text-2xl font-semibold text-slate-900">
                       <Trophy className="h-6 w-6 text-amber-500" />
@@ -597,7 +597,7 @@ export function AdminScreen({ onBack }: AdminScreenProps) {
               </CardFooter>
             </Card>
 
-            <Card className="rounded-3xl border-none bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl">
+            <Card className="rounded-3xl border-none bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 text-white shadow-2xl">
               <CardHeader className="p-6 pb-4">
                 <CardTitle className="flex items-center gap-2 text-xl font-semibold">
                   <Shield className="h-5 w-5" />
