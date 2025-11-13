@@ -70,6 +70,11 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
   const notGradedCount = totalCount - gradedCount - inProgressCount
   const completionPercent = Math.round((gradedCount / totalCount) * 100)
 
+  // small display mapping for event & sponsor logos (replace with real data retrieval later)
+  // show white version of event logos via CSS filter for high contrast in header
+  const eventLogoSrc = eventId === "1" ? "/aggiesinvent.png" : "/pws.png"
+  const sponsor = { name: "Meloy Sponsor", logo: "/TAMUlogo.png" }
+
   const statusCopy: Record<typeof mockTeams[number]["status"], { label: string; tone: string }> = {
     graded: { label: "Graded", tone: "text-emerald-600" },
     "in-progress": { label: "In Progress", tone: "text-amber-500" },
@@ -80,7 +85,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-        <div className="relative mx-auto max-w-7xl px-6 py-8 md:px-8">
+  <div className="relative mx-auto max-w-7xl px-6 py-6 md:px-8">
           {/* Main Header Row */}
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-5">
@@ -131,27 +136,49 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
             </div>
           </div>
 
-          {/* Event Info Row */}
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-white/25 bg-white/10 px-6 py-4 text-white/90">
-            <div className="flex flex-wrap items-center gap-6">
-              <div className="flex items-center gap-3">
-                <CalendarDays className="h-6 w-6 text-white" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/60">Dates</p>
-                  <p className="text-lg font-semibold text-white">March 15–17, 2025</p>
-                </div>
+          {/* Event Info Row - sponsor outside the rounded card: sponsor on left, rounded card on right with only event metadata */}
+          <div className="mt-6 flex items-center gap-8">
+            {/* Sponsor block (separate from rounded card) - interactive if linkable */}
+            <div className="group flex items-center gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
+              <div className="relative flex shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-white/10 to-white/5 p-4 shadow-lg ring-1 ring-white/20 transition-all group-hover:shadow-xl group-hover:ring-white/30">
+                <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
+                <Image
+                  src={sponsor.logo}
+                  alt={sponsor.name ?? "Sponsor logo"}
+                  width={112}
+                  height={112}
+                  className="relative object-contain rounded-md p-1"
+                />
               </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-6 w-6 text-white" />
-                <div>
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/60">Venue</p>
-                  <p className="text-lg font-semibold text-white">Zachry Engineering Center</p>
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.12em] text-white/60">Presented by</p>
+                <p className="text-2xl font-semibold text-white leading-tight max-w-[420px] wrap-break-word">{sponsor.name}</p>
+              </div>
+            </div>
+
+            {/* Rounded rectangular card containing only the event metadata, pushed to the right */}
+            <div className="ml-auto flex items-center rounded-3xl border border-white/20 bg-white/8 px-6 py-3 text-white/90">
+              <div className="flex items-center gap-4">
+                <Image src={eventLogoSrc} alt="Event logo" width={56} height={56} className="object-contain filter brightness-0 invert" />
+
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-3">
+                    <CalendarDays className="h-5 w-5 text-white/90" />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.12em] text-white/60">Dates</p>
+                      <p className="text-sm font-semibold text-white">Mar 15–17, 2025</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-5 w-5 text-white/90" />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.12em] text-white/60">Venue</p>
+                      <p className="text-sm font-semibold text-white">Zachry Engineering Center</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <Badge variant="secondary" className="rounded-full border border-white/40 bg-white/20 px-4 py-2 text-sm font-medium text-white">
-              Event ID - {eventId}
-            </Badge>
           </div>
         </div>
       </header>
