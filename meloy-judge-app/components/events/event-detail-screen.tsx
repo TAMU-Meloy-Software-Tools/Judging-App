@@ -183,47 +183,49 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-7xl px-6 py-12 md:py-16">
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <Card className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-lg backdrop-blur-sm">
-            <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-primary/5 to-transparent" />
-            <CardContent className="relative flex flex-col gap-4 p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Teams graded</p>
-              <p className="text-4xl font-semibold text-slate-900">{gradedCount}</p>
-              <span className="text-sm text-slate-500">{completionPercent}% complete</span>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border border-slate-200/70 bg-white/90 shadow-lg">
-            <CardContent className="flex flex-col gap-4 p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">In progress</p>
-              <p className="text-4xl font-semibold text-slate-900">{inProgressCount}</p>
-              <span className="text-sm text-slate-500">Teams currently being scored</span>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border border-slate-200/70 bg-white/90 shadow-lg">
-            <CardContent className="flex flex-col gap-4 p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Awaiting judging</p>
-              <p className="text-4xl font-semibold text-slate-900">{notGradedCount}</p>
-              <span className="text-sm text-slate-500">Queued for judge review</span>
-            </CardContent>
-          </Card>
-          <Card className="relative overflow-hidden rounded-3xl border border-primary/20 bg-linear-to-br from-primary/90 via-primary/80 to-[#3d0000] text-white shadow-xl">
-            <div className="absolute -right-16 -top-16 h-36 w-36 rounded-full bg-white/10 blur-3xl" />
-            <CardContent className="relative flex flex-col gap-4 p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Momentum</p>
-              <p className="text-lg font-semibold text-white">Stay synced with judges and mentors.</p>
-              <Button
-                variant="secondary"
-                className="w-fit rounded-full border border-white/40 bg-white/20 px-5 py-2 text-sm font-semibold text-white hover:bg-white/30"
-              >
-                <Activity className="mr-2 h-4 w-4" />
-                Share update
-              </Button>
-            </CardContent>
-          </Card>
+      <main className="relative mx-auto max-w-7xl px-6 py-8 md:py-10">
+        <section className="mb-6 grid grid-cols-3 gap-4">
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="absolute inset-0 bg-linear-to-br from-emerald-200/60 via-emerald-100/40 to-transparent" />
+            <div className="relative flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Teams graded</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{gradedCount}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="absolute inset-0 bg-linear-to-br from-amber-200/60 via-amber-100/40 to-transparent" />
+            <div className="relative flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+                <Clock className="h-5 w-5 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">In progress</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{inProgressCount}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <div className="absolute inset-0 bg-linear-to-br from-slate-200/60 via-slate-100/40 to-transparent" />
+            <div className="relative flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+                <Circle className="h-5 w-5 text-slate-500" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Awaiting judging</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{notGradedCount}</p>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <div className="mt-14 space-y-6">
+        <div className="mt-10 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-3xl font-semibold text-slate-900">Team roster</h2>
@@ -231,9 +233,6 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 Tracking {gradedCount} graded, {inProgressCount} in progress, {notGradedCount} awaiting review
               </p>
             </div>
-            <Badge className="rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-              {gradedCount}/{totalCount} complete
-            </Badge>
           </div>
 
           <div className="grid gap-6">
