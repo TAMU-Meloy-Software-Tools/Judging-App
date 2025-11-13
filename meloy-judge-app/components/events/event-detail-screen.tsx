@@ -73,7 +73,11 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
   // small display mapping for event & sponsor logos (replace with real data retrieval later)
   // show white version of event logos via CSS filter for high contrast in header
   const eventLogoSrc = eventId === "1" ? "/aggiesinvent.png" : "/pws.png"
-  const sponsor = { name: "Meloy Sponsor", logo: "/TAMUlogo.png" }
+  const sponsor = { 
+    name: "Meloy Sponsor", 
+    logo: "/TAMUlogo.png",
+    color: "#500000" // Texas A&M maroon - replace with user-chosen sponsor color from event settings
+  }
 
   const statusCopy: Record<typeof mockTeams[number]["status"], { label: string; tone: string }> = {
     graded: { label: "Graded", tone: "text-emerald-600" },
@@ -84,8 +88,8 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-  <div className="relative mx-auto max-w-7xl px-6 py-6 md:px-8">
+    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+  <div className="relative mx-auto max-w-7xl px-6 py-4 md:px-8">
           {/* Main Header Row */}
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-5">
@@ -135,45 +139,68 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
               )}
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Event Info Row - sponsor outside the rounded card: sponsor on left, rounded card on right with only event metadata */}
-          <div className="mt-6 flex items-center gap-8">
-            {/* Sponsor block (separate from rounded card) - interactive if linkable */}
-            <div className="group flex items-center gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
-              <div className="relative flex shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-white/10 to-white/5 p-4 shadow-lg ring-1 ring-white/20 transition-all group-hover:shadow-xl group-hover:ring-white/30">
-                <div className="absolute inset-0 rounded-xl bg-white/5 opacity-0 transition-opacity group-hover:opacity-100" />
-                <Image
-                  src={sponsor.logo}
-                  alt={sponsor.name ?? "Sponsor logo"}
-                  width={112}
-                  height={112}
-                  className="relative object-contain rounded-md p-1"
-                />
+  <main className="relative mx-auto max-w-7xl px-6 py-6 md:py-8">
+        {/* Unified Event Info Banner - sponsor and event details in one cohesive card */}
+  <div className="relative mb-6 rounded-3xl p-0.5 shadow-xl" style={{ background: '#500000' }}>
+          {/* Inner container with gradient background */}
+          <div className="relative rounded-3xl bg-linear-to-br from-primary via-primary/60 to-white p-6">
+            <div className="flex items-center gap-8">
+              {/* Sponsor block with glass container showing sponsor color */}
+              <div className="group relative flex items-center gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
+                {/* Glass rounded box container with enhanced glass aesthetic */}
+                <div 
+                  className="relative flex shrink-0 items-center justify-center rounded-2xl p-4 shadow-xl backdrop-blur-xl transition-all group-hover:shadow-2xl bg-white/70 border-2 border-white/80"
+                >
+                  {/* Inner glow on hover */}
+                  <div 
+                    className="absolute inset-0 rounded-2xl opacity-0 transition-opacity group-hover:opacity-100"
+                    style={{ backgroundColor: `${sponsor.color}10` }}
+                  />
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name ?? "Sponsor logo"}
+                    width={96}
+                    height={96}
+                    className="relative object-contain rounded-md"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs uppercase tracking-[0.12em] text-white/80">Presented by</p>
+                  <p className="text-2xl font-semibold text-white leading-tight max-w-[420px] wrap-break-word drop-shadow-sm">{sponsor.name}</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs uppercase tracking-[0.12em] text-white/60">Presented by</p>
-                <p className="text-2xl font-semibold text-white leading-tight max-w-[420px] wrap-break-word">{sponsor.name}</p>
-              </div>
-            </div>
 
-            {/* Rounded rectangular card containing only the event metadata, pushed to the right */}
-            <div className="ml-auto flex items-center rounded-3xl border border-white/20 bg-white/8 px-6 py-3 text-white/90">
-              <div className="flex items-center gap-4">
-                <Image src={eventLogoSrc} alt="Event logo" width={56} height={56} className="object-contain filter brightness-0 invert" />
+              {/* Event details card with status badge - enhanced glass aesthetic */}
+                <div className="ml-auto flex items-center gap-3">
+                {/* Event Status Badge - enhanced glass background */}
+                <div className="flex items-center gap-2 rounded-full border-2 border-white/70 bg-white/70 backdrop-blur-xl px-4 py-2 shadow-xl">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-sm font-semibold text-emerald-700">Active</span>
+                </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-3">
-                    <CalendarDays className="h-5 w-5 text-white/90" />
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.12em] text-white/60">Dates</p>
-                      <p className="text-sm font-semibold text-white">Mar 15–17, 2025</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-white/90" />
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.12em] text-white/60">Venue</p>
-                      <p className="text-sm font-semibold text-white">Zachry Engineering Center</p>
+                {/* Event details - enhanced glass background */}
+                <div className="flex items-center rounded-3xl border-2 border-white/70 bg-white/70 backdrop-blur-xl px-4 py-2 shadow-xl">
+                  <div className="flex items-center gap-4">
+                    <Image src={eventLogoSrc} alt="Event logo" width={48} height={48} className="object-contain" />
+
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-3">
+                        <CalendarDays className="h-5 w-5 text-slate-700" />
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Dates</p>
+                          <p className="text-sm font-semibold text-slate-900">Mar 15–17, 2025</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-5 w-5 text-slate-700" />
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Venue</p>
+                          <p className="text-sm font-semibold text-slate-900">Zachry Engineering Center</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -181,11 +208,13 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
             </div>
           </div>
         </div>
-      </header>
 
-      <main className="relative mx-auto max-w-7xl px-6 py-8 md:py-10">
-        <section className="mb-6 grid grid-cols-3 gap-4">
-          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
+        {/* Metric cards with visual connection to event info banner */}
+  <section className="relative mb-4 grid grid-cols-3 gap-4">
+          {/* Subtle connecting gradient fade from banner to metrics */}
+          <div className="absolute -top-4 left-0 right-0 h-6 bg-linear-to-b from-slate-50/30 to-transparent pointer-events-none" />
+          
+          <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl" style={{ borderTopColor: `${sponsor.color}30` }}>
             <div className="absolute inset-0 bg-linear-to-br from-emerald-200/60 via-emerald-100/40 to-transparent" />
             <div className="relative flex items-center gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
