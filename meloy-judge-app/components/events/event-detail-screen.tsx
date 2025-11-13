@@ -146,13 +146,13 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
         {/* Unified Event Info Banner - sponsor and event details in one cohesive card */}
   <div className="relative mb-6 rounded-3xl p-0.5 shadow-xl" style={{ background: '#500000' }}>
           {/* Inner container with gradient background */}
-          <div className="relative rounded-3xl bg-linear-to-br from-primary via-primary/60 to-white p-6">
-            <div className="flex items-center gap-8">
+          <div className="relative rounded-3xl bg-linear-to-br from-primary via-primary/60 to-white p-4 md:p-6">
+            <div className="flex items-center gap-4 md:gap-8">
               {/* Sponsor block with glass container showing sponsor color */}
-              <div className="group relative flex items-center gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
+              <div className="group relative flex items-center gap-4 md:gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
                 {/* Glass rounded box container with enhanced glass aesthetic */}
                 <div 
-                  className="relative flex shrink-0 items-center justify-center rounded-2xl p-4 shadow-xl backdrop-blur-xl transition-all group-hover:shadow-2xl bg-white/70 border-2 border-white/80"
+                  className="relative flex shrink-0 items-center justify-center rounded-2xl p-3 md:p-4 lg:p-6 shadow-xl backdrop-blur-xl transition-all group-hover:shadow-2xl bg-white/70 border-2 border-white/80"
                 >
                   {/* Inner glow on hover */}
                   <div 
@@ -164,12 +164,12 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                     alt={sponsor.name ?? "Sponsor logo"}
                     width={96}
                     height={96}
-                    className="relative object-contain rounded-md"
+                    className="relative w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 object-contain rounded-md"
                   />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-[0.12em] text-white/80">Presented by</p>
-                  <p className="text-2xl font-semibold text-white leading-tight max-w-[420px] wrap-break-word drop-shadow-sm">{sponsor.name}</p>
+                  <p className="text-xs md:text-xs uppercase tracking-[0.12em] text-white/80">Presented by</p>
+                  <p className="text-lg md:text-2xl font-semibold text-white leading-tight max-w-[360px] md:max-w-[420px] wrap-break-word drop-shadow-sm">{sponsor.name}</p>
                 </div>
               </div>
 
@@ -183,26 +183,26 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
 
                 {/* Event details - enhanced glass background */}
                 <div className="flex items-center rounded-3xl border-2 border-white/70 bg-white/70 backdrop-blur-xl px-4 py-2 shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <Image src={eventLogoSrc} alt="Event logo" width={48} height={48} className="object-contain" />
+                  <div className="flex items-center gap-3">
+                      <Image src={eventLogoSrc} alt="Event logo" width={48} height={48} className="w-10 h-10 md:w-12 md:h-12 object-contain" />
 
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-3">
-                        <CalendarDays className="h-5 w-5 text-slate-700" />
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Dates</p>
-                          <p className="text-sm font-semibold text-slate-900">Mar 15–17, 2025</p>
+                      <div className="flex items-center gap-4 md:gap-6">
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <CalendarDays className="h-5 w-5 text-slate-700" />
+                          <div>
+                            <p className="text-xs md:text-xs uppercase tracking-[0.12em] text-slate-600">Dates</p>
+                            <p className="text-sm md:text-base font-semibold text-slate-900">Mar 15–17, 2025</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <MapPin className="h-5 w-5 text-slate-700" />
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Venue</p>
-                          <p className="text-sm font-semibold text-slate-900">Zachry Engineering Center</p>
+                        <div className="flex items-center gap-2 md:gap-3">
+                          <MapPin className="h-5 w-5 text-slate-700" />
+                          <div>
+                            <p className="text-xs md:text-xs uppercase tracking-[0.12em] text-slate-600">Venue</p>
+                            <p className="text-sm md:text-base font-semibold text-slate-900">Zachry Engineering Center</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
