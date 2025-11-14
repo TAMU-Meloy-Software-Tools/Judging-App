@@ -111,31 +111,29 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-6 py-12 md:px-10">
-          <div className="flex flex-wrap items-center justify-between gap-7">
-            <div className="flex items-center gap-6">
+        <div className="relative mx-auto max-w-7xl px-6 py-4 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 lg:gap-6 mb-4">
+            <div className="flex items-center gap-4 lg:gap-5">
               <Button
                 variant="ghost"
                 onClick={onBack}
-                className="flex h-14 w-14 items-center justify-center rounded-full text-white hover:bg-white/20"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20"
                 aria-label="Back to event"
               >
-                <ArrowLeft className="h-6 w-6" />
+                <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="flex items-center gap-5">
-                <div className="flex h-16 w-auto items-center justify-center rounded-2xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
-                  <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={128} height={52} className="object-contain" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Team review</p>
-                  <h1 className="text-[2.25rem] font-semibold text-white sm:text-[2.75rem]">{mockTeam.name}</h1>
-                  <p className="text-base text-white/80">Table {mockTeam.tableNumber}</p>
-                </div>
+              <div className="flex h-16 lg:h-20 w-auto items-center justify-center rounded-2xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
+                <Image src="/meloyprogram.png" alt="Meloy Program Judging Portal" width={160} height={64} className="h-12 lg:h-16 w-auto object-contain" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Team review</p>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">{mockTeam.name}</h1>
+                <p className="text-sm text-white/80">Table {mockTeam.tableNumber}</p>
               </div>
             </div>
-            <Badge className="flex flex-col items-start gap-2 rounded-full border border-white/40 bg-white/20 px-6 py-4 text-lg font-semibold text-white sm:flex-row sm:items-center sm:gap-4">
+            <Badge className="flex flex-col items-start gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white sm:flex-row sm:items-center sm:gap-4">
               <span>Total Score {totalScore}/{maxTotalScore}</span>
-              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70 sm:text-[0.7rem]">Team {teamId}</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Team {teamId}</span>
             </Badge>
           </div>
 
@@ -155,7 +153,7 @@ export function TeamDetailScreen({ teamId, onBack }: TeamDetailScreenProps) {
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-4xl px-6 py-12 md:px-8 md:py-16">
+      <main className="relative mx-auto max-w-4xl px-6 py-5 lg:py-6 lg:px-8">
         <section className="space-y-9">
           <div>
             <h2 className="text-[2rem] font-semibold text-slate-900">Judging Rubric</h2>

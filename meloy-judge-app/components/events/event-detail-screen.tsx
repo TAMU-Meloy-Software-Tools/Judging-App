@@ -101,8 +101,8 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex items-center gap-3 lg:gap-4">
-                <div className="flex h-12 lg:h-14 w-auto shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 p-2 shadow-md backdrop-blur-md">
-                  <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={120} height={50} className="h-10 lg:h-12 w-auto object-contain" />
+                <div className="flex h-16 lg:h-20 w-auto shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
+                  <Image src="/meloyprogram.png" alt="Meloy Program Judging Portal" width={160} height={64} className="h-12 lg:h-16 w-auto object-contain" />
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">Event spotlight</p>

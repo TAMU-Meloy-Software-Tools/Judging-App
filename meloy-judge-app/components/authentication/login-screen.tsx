@@ -34,9 +34,9 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         <div className="relative">
           <CardHeader className="px-10 pt-12 pb-6 text-center">
             <Image
-              src="/apptitle.png"
+              src="/meloyprogram.png"
               alt="Meloy Program Judging Portal"
-              width={260}
+              width={280}
               height={120}
               className="mx-auto object-contain"
               style={{

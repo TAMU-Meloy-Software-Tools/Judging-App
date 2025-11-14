@@ -237,21 +237,21 @@ export function InsightsScreen({ onBack }: InsightsScreenProps) {
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40" />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-8 md:px-8">
-          <div className="flex items-center gap-5">
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="flex h-11 w-11 items-center justify-center p-2 text-white hover:bg-white/20"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-4">
-              <div className="flex h-16 w-auto items-center justify-center rounded-xl border border-white/25 bg-white/15 p-2 shadow-md backdrop-blur-md">
-                <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={130} height={60} className="object-contain" />
+        <div className="relative mx-auto max-w-7xl px-6 py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-4 lg:gap-6">
+            <div className="flex items-center gap-4 lg:gap-5">
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex h-16 lg:h-20 w-auto items-center justify-center rounded-xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
+                <Image src="/meloyprogram.png" alt="Meloy Program Judging Portal" width={160} height={64} className="h-12 lg:h-16 w-auto object-contain" />
               </div>
               <div>
-                <h1 className="text-3xl font-semibold text-white sm:text-[2.25rem] md:text-[2.5rem]">Event Insights</h1>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">Event Insights</h1>
                 <p className="text-sm text-white/90">Analytics and performance metrics across all events</p>
               </div>
             </div>
@@ -259,7 +259,7 @@ export function InsightsScreen({ onBack }: InsightsScreenProps) {
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-7xl px-6 py-8 md:py-12">
+      <main className="relative mx-auto max-w-7xl px-6 py-5 lg:py-6 lg:px-8">
         {/* Overview Metrics */}
         <div className="mb-8 grid grid-cols-4 gap-4">
           <Card className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">

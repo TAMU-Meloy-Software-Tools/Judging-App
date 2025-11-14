@@ -50,43 +50,42 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-35" />
-        <div className="relative mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:flex-row md:items-center md:justify-between md:gap-10 md:px-10">
-          <div className="flex flex-1 flex-col gap-6 md:flex-row md:items-center">
-            <div className="flex items-center gap-5">
-              <div className="flex h-16 w-auto items-center justify-center rounded-2xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
-                <Image src="/apptitle.png" alt="Meloy Program Judging Portal" width={140} height={60} className="object-contain" />
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        <div className="relative mx-auto max-w-7xl px-6 py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-4 lg:gap-6">
+            <div className="flex items-center gap-4 lg:gap-5">
+              <div className="flex h-16 lg:h-20 w-auto shrink-0 items-center justify-center rounded-xl border border-white/25 bg-white/15 px-3 py-2 shadow-md backdrop-blur-md">
+                <Image src="/meloyprogram.png" alt="Meloy Program Judging Portal" width={160} height={64} className="h-12 lg:h-16 w-auto object-contain" />
               </div>
               <div>
-                <h1 className="text-[2.25rem] font-semibold text-white sm:text-[2.75rem]">My Events</h1>
-                <p className="text-base text-white/80">Organize judging blocks, revisit past cohorts, and monitor standings.</p>
+                <h1 className="text-3xl lg:text-4xl font-semibold text-white leading-tight">My Events</h1>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3 md:flex-none">
-            {isAdmin && (
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Button
+                  variant="secondary"
+                  onClick={() => onNavigate("admin")}
+                  className="h-11 rounded-full bg-white px-5 lg:px-6 text-base font-semibold text-primary shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white/90"
+                >
+                  <Shield className="mr-2 h-5 w-5" />
+                  Admin
+                </Button>
+              )}
               <Button
-                variant="secondary"
-                onClick={() => onNavigate("admin")}
-                className="h-12 rounded-full bg-white px-6 text-base font-semibold text-primary shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white/90"
+                variant="ghost"
+                onClick={() => onNavigate("settings")}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/20"
+                aria-label="Open settings"
               >
-                <Shield className="mr-2 h-5 w-5" />
-                Admin
+                <Settings className="h-5 w-5" />
               </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={() => onNavigate("settings")}
-              className="flex h-12 w-12 items-center justify-center rounded-full text-white hover:bg-white/20"
-              aria-label="Open settings"
-            >
-              <Settings className="h-6 w-6" />
-            </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-7xl px-6 py-12 md:px-8 md:py-16">
+      <main className="relative mx-auto max-w-7xl px-6 py-5 lg:py-6 lg:px-8">
         <div className="absolute inset-0 -z-10 rounded-[36px] bg-linear-to-b from-white via-slate-50 to-primary/10 shadow-[0_24px_80px_rgba(148,163,184,0.25)]" />
 
         <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
@@ -102,17 +101,23 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
                 {/* Subtle texture overlay */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
                 
-                {/* Active badge - top right */}
-                <Badge
-                  variant={event.status === "active" ? "default" : "secondary"}
-                  className={`absolute top-4 right-4 z-10 shrink-0 text-xs font-semibold px-3 py-1 uppercase tracking-wide ${
+                {/* Status badge - top right with glassy design */}
+                <div className={`absolute top-4 right-4 z-10 flex items-center gap-2 rounded-full border-2 backdrop-blur-xl px-3 py-1.5 shadow-xl ${
+                  event.status === "active"
+                    ? "border-white/70 bg-white/70"
+                    : "border-white/60 bg-white/60"
+                }`}>
+                  {event.status === "active" && (
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  )}
+                  <span className={`text-xs font-semibold uppercase tracking-wide ${
                     event.status === "active"
-                      ? "bg-emerald-500/90 text-white shadow-sm shadow-emerald-500/30"
-                      : "bg-slate-200 text-slate-700"
-                  }`}
-                >
-                  {event.status}
-                </Badge>
+                      ? "text-emerald-700"
+                      : "text-slate-700"
+                  }`}>
+                    {event.status}
+                  </span>
+                </div>
 
                 {/* White glass sponsor container - left side */}
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-xl bg-white/70 backdrop-blur-xl border-2 border-white/80 shadow-xl px-4 py-3">
@@ -164,13 +169,15 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
 
                 {/* Event logo moved to bottom */}
                 <div className="mt-3 flex justify-center">
-                  <div className="flex h-16 items-center justify-center rounded-xl border border-slate-200/70 bg-slate-50/70 px-4 py-2 shadow-sm">
+                  <div className="flex h-20 min-h-20 w-full items-center justify-center rounded-xl border border-slate-200/70 bg-slate-50/70 px-6 py-3 shadow-sm">
                     <Image
                       src={event.logo}
                       alt={event.name}
-                      width={140}
-                      height={48}
-                      className="h-12 w-auto object-contain"
+                      width={180}
+                      height={64}
+                      className={`w-auto max-w-full object-contain ${
+                        event.type === "problems-worth-solving" ? "h-16" : "h-14"
+                      }`}
                     />
                   </div>
                 </div>
