@@ -117,66 +117,86 @@ const mockAllJudgesData = [
     teamName: "Team Epsilon",
     projectTitle: "Food Waste Reduction Platform",
     rank: 1,
+    totalScore: 368, // Sum of all judge scores (out of 400)
     averageScore: 92,
+    judgeOrder: 3, // Order in which this team was judged (for timeline)
     judges: [
-      { name: "Dr. Smith", score: 95, breakdown: { communication: 24, funding: 24, presentation: 24, cohesion: 23 } },
-      { name: "Prof. Johnson", score: 91, breakdown: { communication: 23, funding: 23, presentation: 23, cohesion: 22 } },
-      { name: "Ms. Williams", score: 90, breakdown: { communication: 23, funding: 22, presentation: 23, cohesion: 22 } },
-      { name: "Dr. Brown", score: 92, breakdown: { communication: 24, funding: 23, presentation: 23, cohesion: 22 } },
+      { name: "Dr. Smith", score: 95, order: 1, breakdown: { communication: 24, funding: 24, presentation: 24, cohesion: 23 } },
+      { name: "Prof. Johnson", score: 91, order: 2, breakdown: { communication: 23, funding: 23, presentation: 23, cohesion: 22 } },
+      { name: "Ms. Williams", score: 90, order: 3, breakdown: { communication: 23, funding: 22, presentation: 23, cohesion: 22 } },
+      { name: "Dr. Brown", score: 92, order: 4, breakdown: { communication: 24, funding: 23, presentation: 23, cohesion: 22 } },
     ],
+    scoreVariance: 2.1, // Standard deviation of judge scores
     strengthAreas: ["Communication", "Funding Potential"],
+    categoryConsensus: { communication: "high", funding: "high", presentation: "high", cohesion: "medium" }, // Agreement level
   },
   {
     teamName: "Team Beta",
     projectTitle: "Sustainable Energy Monitor",
     rank: 2,
+    totalScore: 352,
     averageScore: 88,
+    judgeOrder: 2,
     judges: [
-      { name: "Dr. Smith", score: 86, breakdown: { communication: 22, funding: 21, presentation: 22, cohesion: 21 } },
-      { name: "Prof. Johnson", score: 89, breakdown: { communication: 23, funding: 22, presentation: 22, cohesion: 22 } },
-      { name: "Ms. Williams", score: 88, breakdown: { communication: 22, funding: 22, presentation: 22, cohesion: 22 } },
-      { name: "Dr. Brown", score: 89, breakdown: { communication: 23, funding: 22, presentation: 22, cohesion: 22 } },
+      { name: "Dr. Smith", score: 86, order: 1, breakdown: { communication: 22, funding: 21, presentation: 22, cohesion: 21 } },
+      { name: "Prof. Johnson", score: 89, order: 2, breakdown: { communication: 23, funding: 22, presentation: 22, cohesion: 22 } },
+      { name: "Ms. Williams", score: 88, order: 3, breakdown: { communication: 22, funding: 22, presentation: 22, cohesion: 22 } },
+      { name: "Dr. Brown", score: 89, order: 4, breakdown: { communication: 23, funding: 22, presentation: 22, cohesion: 22 } },
     ],
+    scoreVariance: 1.3,
     strengthAreas: ["Presentation", "Communication"],
+    categoryConsensus: { communication: "high", funding: "high", presentation: "high", cohesion: "high" },
   },
   {
     teamName: "Team Alpha",
     projectTitle: "Smart Campus Navigation System",
     rank: 3,
+    totalScore: 340,
     averageScore: 85,
+    judgeOrder: 1,
     judges: [
-      { name: "Dr. Smith", score: 83, breakdown: { communication: 21, funding: 20, presentation: 21, cohesion: 21 } },
-      { name: "Prof. Johnson", score: 85, breakdown: { communication: 22, funding: 21, presentation: 21, cohesion: 21 } },
-      { name: "Ms. Williams", score: 86, breakdown: { communication: 22, funding: 21, presentation: 22, cohesion: 21 } },
-      { name: "Dr. Brown", score: 86, breakdown: { communication: 22, funding: 22, presentation: 21, cohesion: 21 } },
+      { name: "Dr. Smith", score: 83, order: 1, breakdown: { communication: 21, funding: 20, presentation: 21, cohesion: 21 } },
+      { name: "Prof. Johnson", score: 85, order: 2, breakdown: { communication: 22, funding: 21, presentation: 21, cohesion: 21 } },
+      { name: "Ms. Williams", score: 86, order: 3, breakdown: { communication: 22, funding: 21, presentation: 22, cohesion: 21 } },
+      { name: "Dr. Brown", score: 86, order: 4, breakdown: { communication: 22, funding: 22, presentation: 21, cohesion: 21 } },
     ],
+    scoreVariance: 1.4,
     strengthAreas: ["Communication", "Cohesion"],
+    categoryConsensus: { communication: "high", funding: "high", presentation: "high", cohesion: "high" },
   },
   {
     teamName: "Team Gamma",
     projectTitle: "AI-Powered Study Assistant",
     rank: 4,
+    totalScore: 328,
     averageScore: 82,
+    judgeOrder: 4,
     judges: [
-      { name: "Dr. Smith", score: 80, breakdown: { communication: 20, funding: 20, presentation: 20, cohesion: 20 } },
-      { name: "Prof. Johnson", score: 82, breakdown: { communication: 21, funding: 20, presentation: 20, cohesion: 21 } },
-      { name: "Ms. Williams", score: 83, breakdown: { communication: 21, funding: 21, presentation: 20, cohesion: 21 } },
-      { name: "Dr. Brown", score: 83, breakdown: { communication: 21, funding: 21, presentation: 21, cohesion: 20 } },
+      { name: "Dr. Smith", score: 80, order: 1, breakdown: { communication: 20, funding: 20, presentation: 20, cohesion: 20 } },
+      { name: "Prof. Johnson", score: 82, order: 2, breakdown: { communication: 21, funding: 20, presentation: 20, cohesion: 21 } },
+      { name: "Ms. Williams", score: 83, order: 3, breakdown: { communication: 21, funding: 21, presentation: 20, cohesion: 21 } },
+      { name: "Dr. Brown", score: 83, order: 4, breakdown: { communication: 21, funding: 21, presentation: 21, cohesion: 20 } },
     ],
+    scoreVariance: 1.3,
     strengthAreas: ["Communication"],
+    categoryConsensus: { communication: "medium", funding: "medium", presentation: "high", cohesion: "medium" },
   },
   {
     teamName: "Team Delta",
     projectTitle: "Campus Safety Alert System",
     rank: 5,
+    totalScore: 312,
     averageScore: 78,
+    judgeOrder: 5,
     judges: [
-      { name: "Dr. Smith", score: 76, breakdown: { communication: 19, funding: 19, presentation: 19, cohesion: 19 } },
-      { name: "Prof. Johnson", score: 78, breakdown: { communication: 20, funding: 19, presentation: 19, cohesion: 20 } },
-      { name: "Ms. Williams", score: 79, breakdown: { communication: 20, funding: 20, presentation: 19, cohesion: 20 } },
-      { name: "Dr. Brown", score: 79, breakdown: { communication: 20, funding: 20, presentation: 20, cohesion: 19 } },
+      { name: "Dr. Smith", score: 76, order: 1, breakdown: { communication: 19, funding: 19, presentation: 19, cohesion: 19 } },
+      { name: "Prof. Johnson", score: 78, order: 2, breakdown: { communication: 20, funding: 19, presentation: 19, cohesion: 20 } },
+      { name: "Ms. Williams", score: 79, order: 3, breakdown: { communication: 20, funding: 20, presentation: 19, cohesion: 20 } },
+      { name: "Dr. Brown", score: 79, order: 4, breakdown: { communication: 20, funding: 20, presentation: 20, cohesion: 19 } },
     ],
+    scoreVariance: 1.4,
     strengthAreas: ["Communication"],
+    categoryConsensus: { communication: "high", funding: "high", presentation: "high", cohesion: "medium" },
   },
 ]
 
@@ -244,7 +264,7 @@ const mockLeaderboard = [
 ]
 
 export function LeaderboardScreen({ eventId, onBack }: LeaderboardScreenProps) {
-  const [isPostJudging, setIsPostJudging] = useState(false)
+  const [isPostJudging, setIsPostJudging] = useState(true) // Default to Post Judging view
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
@@ -472,10 +492,36 @@ function DuringJudgingView() {
 
 /* POST JUDGING VIEW COMPONENT */
 function PostJudgingView() {
+  const [compareMode, setCompareMode] = useState(false)
+  const [selectedTeams, setSelectedTeams] = useState<number[]>([])
+  
   const sortedTeams = [...mockAllJudgesData].sort((a, b) => a.rank - b.rank)
   const totalTeams = sortedTeams.length
-  const avgScore = Math.round(sortedTeams.reduce((sum, team) => sum + team.averageScore, 0) / totalTeams)
-  const topScore = sortedTeams[0]?.averageScore || 0
+  const maxPossibleScore = 400 // 4 judges × 100 points each
+  
+  // Calculate judge calibration (are scores trending up/down over time?)
+  const judgeCalibration = sortedTeams
+    .sort((a, b) => a.judgeOrder - b.judgeOrder)
+    .map(team => ({
+      teamName: team.teamName,
+      order: team.judgeOrder,
+      avgScore: team.averageScore,
+      totalScore: team.totalScore,
+    }))
+
+  const toggleTeamSelection = (rank: number) => {
+    if (selectedTeams.includes(rank)) {
+      setSelectedTeams(selectedTeams.filter(r => r !== rank))
+    } else if (selectedTeams.length < 3) {
+      setSelectedTeams([...selectedTeams, rank])
+    }
+  }
+
+  // Get close competitors (within 20 points)
+  const closeCompetitors = sortedTeams.slice(0, 3).filter((team, idx, arr) => {
+    if (idx === 0) return true
+    return arr[idx - 1].totalScore - team.totalScore <= 20
+  })
 
   const metrics = [
     {
@@ -487,17 +533,17 @@ function PostJudgingView() {
       bgColor: "from-primary/25 via-primary/10 to-transparent",
     },
     {
-      id: "avg-score",
-      label: "Average Score",
-      value: avgScore.toString(),
+      id: "score-spread",
+      label: "Score Spread",
+      value: `${sortedTeams[0].totalScore - sortedTeams[sortedTeams.length - 1].totalScore} pts`,
       icon: BarChart3,
       iconColor: "text-sky-500",
       bgColor: "from-sky-200/60 via-sky-100/40 to-transparent",
     },
     {
-      id: "top-score",
-      label: "Top Score",
-      value: topScore.toString(),
+      id: "close-race",
+      label: "Close Race",
+      value: closeCompetitors.length > 1 ? `Top ${closeCompetitors.length}` : "Clear Winner",
       icon: Trophy,
       iconColor: "text-amber-500",
       bgColor: "from-amber-200/60 via-amber-100/40 to-transparent",
@@ -532,158 +578,245 @@ function PostJudgingView() {
         })}
       </div>
 
-      {/* Section Header */}
-      <div className="pt-2">
-        <h2 className="text-[1.9rem] font-semibold text-slate-900">Final Event Rankings</h2>
-        <p className="mt-2 text-base text-slate-500">
-          Complete breakdown of all teams with judge-by-judge analysis and scoring details.
-        </p>
-      </div>
-
-      {sortedTeams.map((team) => (
-        <Card key={team.rank} className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl">
-          <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
-          
-          <CardHeader className="flex flex-col gap-5 p-7 pb-5">
-            <div className="flex flex-wrap items-start justify-between gap-5">
-              <div className="flex flex-1 items-start gap-4">
-                <div
-                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white font-bold text-2xl shadow-lg ${
-                    team.rank === 1
-                      ? "bg-linear-to-br from-yellow-400 to-yellow-500"
-                      : team.rank === 2
-                      ? "bg-linear-to-br from-slate-300 to-slate-400"
-                      : team.rank === 3
-                      ? "bg-linear-to-br from-orange-400 to-orange-500"
-                      : "bg-linear-to-br from-slate-500 to-slate-600"
-                  }`}
-                >
-                  {team.rank === 1 ? <Trophy className="h-8 w-8" /> : team.rank === 2 ? <Medal className="h-7 w-7" /> : team.rank === 3 ? <Award className="h-7 w-7" /> : `#${team.rank}`}
-                </div>
-                <div className="space-y-1.5">
-                  <CardTitle className="text-[1.5rem] font-semibold text-slate-900">{team.teamName}</CardTitle>
-                  <CardDescription className="text-lg text-slate-600">{team.projectTitle}</CardDescription>
-                </div>
+      {/* Score Progression Timeline */}
+      <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95 shadow-md">
+        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-60" />
+        <CardHeader className="p-7 pb-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10">
+                <TrendingUp className="h-6 w-6 text-primary" />
               </div>
-              <Badge className={`shrink-0 rounded-full px-5 py-3 text-lg font-semibold shadow-sm ${
-                team.rank === 1
-                  ? "bg-primary text-white"
-                  : team.rank <= 3
-                  ? "bg-primary/10 text-primary"
-                  : "bg-slate-100 text-slate-700"
-              }`}>
-                {team.averageScore} pts
-              </Badge>
+              <div>
+                <CardTitle className="text-xl font-semibold text-slate-900">Score Progression Timeline</CardTitle>
+                <CardDescription className="text-base text-slate-600">
+                  See how scores evolved throughout the judging session
+                </CardDescription>
+              </div>
             </div>
-          </CardHeader>
-
-          <CardContent className="space-y-6 px-7 pb-7">
-            {/* Category Performance Across All Judges */}
-            <div>
-              <h3 className="text-base font-semibold mb-4 flex items-center gap-2 text-slate-700">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Average Category Performance
-              </h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                {rubricOrder.map((category) => {
-                  const avgScore =
-                    team.judges.reduce((sum, judge) => sum + judge.breakdown[category.key as keyof typeof judge.breakdown], 0) /
-                    team.judges.length
-                  const percentage = (avgScore / category.maxScore) * 100
-
-                  return (
-                    <div key={category.key} className="rounded-[20px] border border-slate-200/70 bg-slate-50/70 px-4 py-3">
-                      <div className="flex items-center justify-between text-sm font-semibold text-slate-600 mb-2">
-                        <span>{category.label}</span>
-                        <span>{avgScore.toFixed(1)}/{category.maxScore}</span>
+          </div>
+        </CardHeader>
+        <CardContent className="px-7 pb-7">
+          <div className="space-y-4">
+            {/* Timeline visualization */}
+            <div className="relative">
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200" />
+              {judgeCalibration.map((team, idx) => {
+                const teamData = sortedTeams.find(t => t.teamName === team.teamName)
+                const isTop3 = teamData ? teamData.rank <= 3 : false
+                return (
+                  <div key={idx} className="relative flex items-center gap-4 pb-6 last:pb-0">
+                    <div className={`relative z-10 flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-white shadow-lg ${
+                      isTop3 ? 'bg-linear-to-br from-primary to-[#3d0000]' : 'bg-linear-to-br from-slate-400 to-slate-600'
+                    }`}>
+                      <span className="text-lg font-bold text-white">{team.order}</span>
+                    </div>
+                    <div className="flex-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-slate-900">{team.teamName}</p>
+                          <p className="text-sm text-slate-600">Judging Order #{team.order}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary">{team.totalScore}</p>
+                          <p className="text-xs text-slate-500">out of {maxPossibleScore}</p>
+                        </div>
                       </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                      {/* Score bar */}
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
                         <div 
                           className="h-full rounded-full bg-primary transition-all" 
-                          style={{ width: `${percentage}%` }} 
+                          style={{ width: `${(team.totalScore / maxPossibleScore) * 100}%` }} 
                         />
                       </div>
                     </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Strength Areas */}
-            <div className="rounded-[22px] border-2 border-emerald-200 bg-emerald-50/70 p-4">
-              <h4 className="text-sm font-semibold text-emerald-900 mb-3 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Key Strengths
-              </h4>
-              <div className="flex flex-wrap gap-2">
-                {team.strengthAreas.map((area, idx) => (
-                  <Badge key={idx} className="bg-emerald-600 text-white rounded-full px-3 py-1.5 text-sm">
-                    {area}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Individual Judge Scores */}
-            <div>
-              <h3 className="text-base font-semibold mb-3 flex items-center gap-2 text-slate-700">
-                <Users className="h-5 w-5 text-primary" />
-                Individual Judge Scores
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {team.judges.map((judge, idx) => (
-                  <div key={idx} className="rounded-[20px] border border-slate-200/70 bg-slate-50/70 p-4 text-center">
-                    <p className="text-sm font-semibold text-slate-900 mb-2 truncate">{judge.name}</p>
-                    <p className="text-3xl font-bold text-primary">{judge.score}</p>
-                    <p className="text-xs text-slate-500 mt-1">out of 100</p>
                   </div>
-                ))}
-              </div>
+                )
+              })}
             </div>
+            
+            {/* Calibration insight */}
+            <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-4">
+              <p className="text-sm font-semibold text-blue-900 mb-1 flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Judging Pattern Insight
+              </p>
+              <p className="text-sm text-blue-800">
+                Scores appear relatively consistent throughout the session. No significant calibration drift detected.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-            {/* Detailed Judge Breakdown - Expandable */}
-            <details className="group rounded-[20px] border border-slate-200/70 bg-slate-50/50">
-              <summary className="cursor-pointer p-4 text-sm font-semibold text-primary hover:text-primary/80 flex items-center justify-between list-none">
-                <span className="flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" />
-                  View Detailed Category Scores by Judge
-                </span>
-                <span className="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <div className="px-4 pb-4 pt-2 space-y-3">
-                {team.judges.map((judge, idx) => (
-                  <div key={idx} className="rounded-[18px] border border-slate-200/70 bg-white p-5">
-                    <h4 className="font-semibold text-slate-900 mb-4 flex items-center justify-between">
-                      <span>{judge.name}</span>
-                      <Badge className="bg-primary/10 text-primary">{judge.score} pts</Badge>
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {rubricOrder.map((category) => {
-                        const score = judge.breakdown[category.key as keyof typeof judge.breakdown]
-                        const percentage = (score / category.maxScore) * 100
-                        return (
-                          <div key={category.key} className="space-y-2">
-                            <div className="text-center">
-                              <div className="text-xs text-slate-600 mb-1">{category.short}</div>
-                              <div className="text-lg font-bold text-slate-900">{score}/{category.maxScore}</div>
-                            </div>
-                            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full rounded-full bg-primary transition-all" 
-                                style={{ width: `${percentage}%` }} 
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
+      {/* Section Header with Compare Toggle */}
+      <div className="flex items-center justify-between pt-2">
+        <div>
+          <h2 className="text-[1.9rem] font-semibold text-slate-900">Final Rankings</h2>
+          <p className="mt-2 text-base text-slate-500">
+            Total scores shown (sum of all judges, max {maxPossibleScore} pts) • Click teams to compare
+          </p>
+        </div>
+        {selectedTeams.length >= 2 && (
+          <Button
+            onClick={() => setCompareMode(!compareMode)}
+            className="h-11 rounded-xl bg-primary px-5 text-base font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5"
+          >
+            {compareMode ? "Exit" : "Compare"} Selected Teams
+          </Button>
+        )}
+      </div>
+
+      {/* Team Rankings with Selection */}
+      {sortedTeams.map((team) => {
+        const isSelected = selectedTeams.includes(team.rank)
+        const isClose = closeCompetitors.some(t => t.teamName === team.teamName)
+        
+        return (
+          <Card 
+            key={team.rank} 
+            className={`relative overflow-hidden rounded-[28px] border bg-white/95 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl cursor-pointer ${
+              isSelected ? 'border-primary border-2 ring-2 ring-primary/20' : 'border-slate-200/80'
+            } ${isClose && !isSelected ? 'border-amber-300' : ''}`}
+            onClick={() => toggleTeamSelection(team.rank)}
+          >
+            <div className={`absolute inset-x-0 top-0 h-1 opacity-60 ${
+              isSelected ? 'bg-primary' : 'bg-linear-to-r from-primary via-rose-400 to-orange-300'
+            }`} />
+            
+            {isClose && (
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-amber-500 text-white text-xs px-2 py-1 rounded-full">
+                  Close Race
+                </Badge>
+              </div>
+            )}
+            
+            <CardHeader className="flex flex-col gap-4 p-7 pb-5">
+              <div className="flex flex-wrap items-start justify-between gap-5">
+                <div className="flex flex-1 items-start gap-4">
+                  <div
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-white font-bold text-2xl shadow-lg ${
+                      team.rank === 1
+                        ? "bg-linear-to-br from-yellow-400 to-yellow-500"
+                        : team.rank === 2
+                        ? "bg-linear-to-br from-slate-300 to-slate-400"
+                        : team.rank === 3
+                        ? "bg-linear-to-br from-orange-400 to-orange-500"
+                        : "bg-linear-to-br from-slate-500 to-slate-600"
+                    }`}
+                  >
+                    {team.rank === 1 ? <Trophy className="h-8 w-8" /> : team.rank === 2 ? <Medal className="h-7 w-7" /> : team.rank === 3 ? <Award className="h-7 w-7" /> : `#${team.rank}`}
+                  </div>
+                  <div className="space-y-1.5 flex-1">
+                    <CardTitle className="text-[1.5rem] font-semibold text-slate-900">{team.teamName}</CardTitle>
+                    <CardDescription className="text-lg text-slate-600">{team.projectTitle}</CardDescription>
+                    
+                    {/* Consensus indicator */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-1">
+                        {Object.values(team.categoryConsensus).filter(c => c === 'high').length >= 3 ? (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-xs px-2 py-0.5">
+                            High Consensus
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-amber-100 text-amber-700 text-xs px-2 py-0.5">
+                            Mixed Consensus
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-slate-500">±{team.scoreVariance.toFixed(1)} variance</span>
                     </div>
                   </div>
-                ))}
+                </div>
+                <div className="text-right space-y-2">
+                  <Badge className={`rounded-full px-5 py-3 text-lg font-semibold shadow-sm ${
+                    team.rank === 1
+                      ? "bg-primary text-white"
+                      : team.rank <= 3
+                      ? "bg-primary/10 text-primary"
+                      : "bg-slate-100 text-slate-700"
+                  }`}>
+                    {team.totalScore}/{maxPossibleScore}
+                  </Badge>
+                  <p className="text-sm text-slate-500">Avg: {team.averageScore}/100</p>
+                </div>
               </div>
-            </details>
-          </CardContent>
-        </Card>
-      ))}
+            </CardHeader>
+
+            <CardContent className="space-y-5 px-7 pb-7">
+              {/* Compact Category Performance */}
+              <div>
+                <h3 className="text-sm font-semibold mb-3 text-slate-700">Category Breakdown</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  {rubricOrder.map((category) => {
+                    const avgScore =
+                      team.judges.reduce((sum, judge) => sum + judge.breakdown[category.key as keyof typeof judge.breakdown], 0) /
+                      team.judges.length
+                    const maxScore = category.maxScore * team.judges.length // e.g., 25 * 4 = 100
+                    const percentage = (avgScore / category.maxScore) * 100
+                    const consensus = team.categoryConsensus[category.key as keyof typeof team.categoryConsensus]
+
+                    return (
+                      <div key={category.key} className="space-y-2">
+                        <div className="text-center">
+                          <p className="text-xs text-slate-600 mb-1">{category.short}</p>
+                          <p className="text-base font-bold text-slate-900">
+                            {Math.round(avgScore * team.judges.length)}/{maxScore}
+                          </p>
+                          {consensus === 'high' && (
+                            <div className="flex justify-center mt-1">
+                              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" title="High agreement" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full bg-primary transition-all" 
+                            style={{ width: `${percentage}%` }} 
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Judge Score Distribution */}
+              <div>
+                <h3 className="text-sm font-semibold mb-3 text-slate-700">Judge Scores</h3>
+                <div className="flex items-center gap-2">
+                  {team.judges.sort((a, b) => a.order - b.order).map((judge, idx) => (
+                    <div key={idx} className="flex-1">
+                      <div className="relative h-24 bg-slate-100 rounded-lg overflow-hidden">
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-primary to-primary/80 transition-all flex items-end justify-center pb-2"
+                          style={{ height: `${(judge.score / 100) * 100}%` }}
+                        >
+                          <span className="text-xs font-bold text-white">{judge.score}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-center text-slate-600 mt-2 truncate">{judge.name.split(' ')[1]}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Strengths */}
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+                <div className="flex flex-wrap gap-2">
+                  {team.strengthAreas.map((area, idx) => (
+                    <Badge key={idx} className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1">
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
     </div>
   )
 }
