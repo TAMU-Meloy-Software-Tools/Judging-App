@@ -24,7 +24,7 @@ export default function Home() {
   const [previousScreen, setPreviousScreen] = useState<Screen | null>(null)
 
   const handleLogin = (admin = false) => {
-    setIsAdmin(admin)
+    setIsAdmin(true) // Always set as admin for now
     setCurrentScreen("dashboard")
   }
 
