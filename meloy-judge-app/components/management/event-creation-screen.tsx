@@ -31,10 +31,15 @@ interface EventCreationScreenProps {
 
 type EventType = "aggies-invent" | "problems-worth-solving"
 
-interface Judge {
+interface JudgingAccount {
   id: string
   name: string
   email: string
+}
+
+interface Judge {
+  id: string
+  name: string
 }
 
 interface TeamMember {
@@ -60,9 +65,25 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
   const [eventLocation, setEventLocation] = useState("")
   const [eventDescription, setEventDescription] = useState("")
 
+  // Mock judging accounts - in production, this would come from your backend
+  const availableJudgingAccounts: JudgingAccount[] = [
+    { id: "1", name: "Dr. Sarah Johnson", email: "sjohnson@tamu.edu" },
+    { id: "2", name: "Prof. Michael Chen", email: "mchen@tamu.edu" },
+    { id: "3", name: "Dr. Emily Rodriguez", email: "erodriguez@tamu.edu" },
+    { id: "4", name: "Dr. James Anderson", email: "janderson@tamu.edu" },
+    { id: "5", name: "Prof. Lisa Martinez", email: "lmartinez@tamu.edu" },
+    { id: "6", name: "Dr. Robert Thompson", email: "rthompson@tamu.edu" },
+    { id: "7", name: "Dr. Jennifer Lee", email: "jlee@tamu.edu" },
+    { id: "8", name: "Prof. David Brown", email: "dbrown@tamu.edu" },
+    { id: "9", name: "Dr. Maria Garcia", email: "mgarcia@tamu.edu" },
+    { id: "10", name: "Dr. William Taylor", email: "wtaylor@tamu.edu" },
+    { id: "11", name: "Prof. Patricia Wilson", email: "pwilson@tamu.edu" },
+    { id: "12", name: "Dr. Christopher Moore", email: "cmoore@tamu.edu" },
+  ]
+
+  const [selectedJudgingAccount, setSelectedJudgingAccount] = useState<JudgingAccount | null>(null)
   const [judges, setJudges] = useState<Judge[]>([])
   const [newJudgeName, setNewJudgeName] = useState("")
-  const [newJudgeEmail, setNewJudgeEmail] = useState("")
 
   const [teams, setTeams] = useState<Team[]>([])
   const [newTeamName, setNewTeamName] = useState("")
@@ -86,10 +107,9 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
   }
 
   const addJudge = () => {
-    if (newJudgeName && newJudgeEmail) {
-      setJudges([...judges, { id: Date.now().toString(), name: newJudgeName, email: newJudgeEmail }])
+    if (newJudgeName) {
+      setJudges([...judges, { id: Date.now().toString(), name: newJudgeName }])
       setNewJudgeName("")
-      setNewJudgeEmail("")
     }
   }
 
@@ -132,6 +152,7 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
       eventDuration,
       eventLocation,
       eventDescription,
+      selectedJudgingAccount,
       judges,
       teams,
     })
@@ -434,96 +455,157 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
             </CardContent>
           </Card>
 
-          {/* Judge Creation Section */}
+          {/* Judging Account Section */}
           <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-lg">
             <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
             <CardHeader className="p-8 pb-6">
               <CardTitle className="flex items-center gap-3 text-2xl font-semibold text-slate-900">
                 <Users className="h-6 w-6 text-primary" />
-                Judge Creation
+                Judging Account
               </CardTitle>
               <CardDescription className="text-base text-slate-600">
-                Add judges who will evaluate teams during this event.
+                Select the primary judging account for this event and add judges who will evaluate teams.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 p-8 pt-0">
-              <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
-                <div className="space-y-2">
-                  <Label htmlFor="judge-name" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Judge Name
-                  </Label>
-                  <Input
-                    id="judge-name"
-                    placeholder="e.g., Dr. Sarah Johnson"
-                    value={newJudgeName}
-                    onChange={(e) => setNewJudgeName(e.target.value)}
-                    className="h-12 rounded-xl border-slate-200 bg-white px-4 text-base shadow-inner focus-visible:border-primary/60"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="judge-email" className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Email Address
-                  </Label>
-                  <Input
-                    id="judge-email"
-                    type="email"
-                    placeholder="judge@example.com"
-                    value={newJudgeEmail}
-                    onChange={(e) => setNewJudgeEmail(e.target.value)}
-                    className="h-12 rounded-xl border-slate-200 bg-white px-4 text-base shadow-inner focus-visible:border-primary/60"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={addJudge}
-                    className="h-12 rounded-xl bg-primary px-6 text-base font-semibold shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl"
-                  >
-                    <Plus className="mr-2 h-5 w-5" />
-                    Add
-                  </Button>
-                </div>
-              </div>
-
-              {judges.length > 0 ? (
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Added Judges ({judges.length})
-                  </p>
-                  <div className="space-y-3">
-                    {judges.map((judge) => (
-                      <div
-                        key={judge.id}
-                        className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50/70 px-5 py-4"
+              {/* Account Selection */}
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Primary Judging Account
+                </Label>
+                <div className="max-h-[400px] overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                  <div className="grid gap-3">
+                    {availableJudgingAccounts.map((account) => (
+                      <button
+                        key={account.id}
+                        onClick={() => setSelectedJudgingAccount(account)}
+                        className={`flex items-center justify-between rounded-2xl border-2 p-5 text-left transition-all ${
+                          selectedJudgingAccount?.id === account.id
+                            ? "border-primary/50 bg-primary/10 shadow-md"
+                            : "border-slate-200 bg-white hover:border-primary/30 hover:bg-primary/5"
+                        }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                            <Users className="h-5 w-5 text-primary" />
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                            <Users className="h-6 w-6 text-primary" />
                           </div>
                           <div>
-                            <p className="text-base font-semibold text-slate-900">{judge.name}</p>
+                            <p className="text-base font-semibold text-slate-900">{account.name}</p>
                             <p className="flex items-center gap-2 text-sm text-slate-600">
                               <Mail className="h-3 w-3" />
-                              {judge.email}
+                              {account.email}
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeJudge(judge.id)}
-                          className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        {selectedJudgingAccount?.id === account.id && (
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
+                            <svg
+                              className="h-4 w-4 text-white"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
                     ))}
                   </div>
                 </div>
-              ) : (
+              </div>
+
+              {/* Judge List - Only show if account is selected */}
+              {selectedJudgingAccount && (
+                <>
+                  <div className="h-px bg-slate-200" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        Add Judges for {selectedJudgingAccount.name}
+                      </Label>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+                      <div className="space-y-2">
+                        <Input
+                          id="judge-name"
+                          placeholder="Enter judge name"
+                          value={newJudgeName}
+                          onChange={(e) => setNewJudgeName(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault()
+                              addJudge()
+                            }
+                          }}
+                          className="h-12 rounded-xl border-slate-200 bg-white px-4 text-base shadow-inner focus-visible:border-primary/60"
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button
+                          onClick={addJudge}
+                          disabled={!newJudgeName}
+                          className="h-12 rounded-xl bg-primary px-6 text-base font-semibold shadow-lg transition-transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50"
+                        >
+                          <Plus className="mr-2 h-5 w-5" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+
+                    {judges.length > 0 ? (
+                      <div className="space-y-3">
+                        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          Added Judges ({judges.length})
+                        </p>
+                        <div className="space-y-3">
+                          {judges.map((judge) => (
+                            <div
+                              key={judge.id}
+                              className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50/70 px-5 py-4"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                                  <Users className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="text-base font-semibold text-slate-900">{judge.name}</p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeJudge(judge.id)}
+                                className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 py-8 text-center">
+                        <Users className="mb-3 h-10 w-10 text-slate-300" />
+                        <p className="text-sm font-semibold text-slate-600">No judges added yet</p>
+                        <p className="text-xs text-slate-500">Add judges using the form above</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Prompt to select account */}
+              {!selectedJudgingAccount && (
                 <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 py-12 text-center">
                   <Users className="mb-4 h-12 w-12 text-slate-300" />
-                  <p className="text-base font-semibold text-slate-600">No judges added yet</p>
-                  <p className="text-sm text-slate-500">Add judges using the form above</p>
+                  <p className="text-base font-semibold text-slate-600">Select a judging account</p>
+                  <p className="text-sm text-slate-500">Choose an account above to start adding judges</p>
                 </div>
               )}
             </CardContent>

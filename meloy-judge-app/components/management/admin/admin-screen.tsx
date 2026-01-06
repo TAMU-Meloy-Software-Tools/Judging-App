@@ -190,10 +190,6 @@ export function AdminScreen({ onBack, onCreateEvent, onManageEvent }: AdminScree
                 <p className="text-sm text-white/90">Orchestrate events, coach judges, and spotlight standout teams.</p>
               </div>
             </div>
-            <Badge variant="secondary" className="hidden sm:flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-2 text-xs font-medium uppercase tracking-[0.12em] text-white">
-              <Sparkles className="h-3.5 w-3.5" />
-              Live Cohort 2025
-            </Badge>
           </div>
         </div>
       </header>

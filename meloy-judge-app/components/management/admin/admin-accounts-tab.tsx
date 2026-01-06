@@ -83,12 +83,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <button
                               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm transition-all hover:shadow-md ${
                                 account.isJudge
-                                  ? 'border-red-500/60 bg-red-500/20 hover:border-red-400/70 hover:bg-red-500/30'
+                                  ? 'border-white/50 bg-white/95 hover:border-white/60 hover:bg-white'
                                   : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/20'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isJudge ? 'text-red-300' : 'text-white/70'
+                                account.isJudge ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Judge
                               </span>
@@ -97,12 +97,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <button
                               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm transition-all hover:shadow-md ${
                                 account.isAdmin
-                                  ? 'border-blue-500/60 bg-blue-500/20 hover:border-blue-400/70 hover:bg-blue-500/30'
+                                  ? 'border-white/50 bg-white/95 hover:border-white/60 hover:bg-white'
                                   : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/20'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isAdmin ? 'text-blue-300' : 'text-white/70'
+                                account.isAdmin ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Admin
                               </span>
@@ -111,12 +111,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <button
                               className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm transition-all hover:shadow-md ${
                                 account.isModerator
-                                  ? 'border-emerald-500/60 bg-emerald-500/20 hover:border-emerald-400/70 hover:bg-emerald-500/30'
+                                  ? 'border-white/50 bg-white/95 hover:border-white/60 hover:bg-white'
                                   : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/20'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isModerator ? 'text-emerald-300' : 'text-white/70'
+                                account.isModerator ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Moderator
                               </span>
@@ -155,12 +155,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <div
                               className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm ${
                                 account.isJudge
-                                  ? 'border-red-500/60 bg-red-500/20'
+                                  ? 'border-white/50 bg-white/95'
                                   : 'border-white/20 bg-white/10'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isJudge ? 'text-red-300' : 'text-white/70'
+                                account.isJudge ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Judge
                               </span>
@@ -169,12 +169,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <div
                               className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm ${
                                 account.isAdmin
-                                  ? 'border-blue-500/60 bg-blue-500/20'
+                                  ? 'border-white/50 bg-white/95'
                                   : 'border-white/20 bg-white/10'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isAdmin ? 'text-blue-300' : 'text-white/70'
+                                account.isAdmin ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Admin
                               </span>
@@ -183,12 +183,12 @@ export function AdminAccountsTab({ accounts }: AdminAccountsTabProps) {
                             <div
                               className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 shadow-sm backdrop-blur-sm ${
                                 account.isModerator
-                                  ? 'border-emerald-500/60 bg-emerald-500/20'
+                                  ? 'border-white/50 bg-white/95'
                                   : 'border-white/20 bg-white/10'
                               }`}
                             >
                               <span className={`text-sm font-semibold ${
-                                account.isModerator ? 'text-emerald-300' : 'text-white/70'
+                                account.isModerator ? 'text-slate-800' : 'text-white/70'
                               }`}>
                                 Moderator
                               </span>

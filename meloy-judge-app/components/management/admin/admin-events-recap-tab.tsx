@@ -71,7 +71,7 @@ export function AdminEventsRecapTab({ eventHistory }: AdminEventsRecapTabProps) 
         
         <div className="relative p-6">
           <div className="mb-6 flex items-center justify-between">
-            <h4 className="text-lg font-semibold text-white">Select Event</h4>
+            <h4 className="text-lg font-semibold text-white">Events Timeline</h4>
             <div className="flex gap-2">
               <Button
                 onClick={() => setSelectedEventIndex(Math.max(0, selectedEventIndex - 1))}
@@ -203,7 +203,7 @@ export function AdminEventsRecapTab({ eventHistory }: AdminEventsRecapTabProps) 
                               <div className="text-2xl font-bold text-emerald-300">{percentage}%</div>
                             </div>
                             <div className="text-right">
-                              <div className="text-xs font-semibold uppercase tracking-wider text-white/70">Avg Time</div>
+                              <div className="text-xs font-semibold uppercase tracking-wider text-white/70">Time</div>
                               <div className="text-2xl font-bold text-sky-300">{team.avgTime}m</div>
                             </div>
                           </div>
