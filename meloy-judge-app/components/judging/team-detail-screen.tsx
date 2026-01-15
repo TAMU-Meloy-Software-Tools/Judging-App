@@ -133,7 +133,13 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   const triggerConfetti = () => {
     const duration = 3000
     const animationEnd = Date.now() + duration
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+    const defaults = { 
+      startVelocity: 30, 
+      spread: 360, 
+      ticks: 60, 
+      zIndex: 9999,
+      colors: ['#500000', '#800000', '#A52A2A', '#8B0000', '#600000']
+    }
 
     function randomInRange(min: number, max: number) {
       return Math.random() * (max - min) + min

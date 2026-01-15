@@ -417,15 +417,15 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
                           </tr>
                         </thead>
                         <tbody>
-                          {teams.sort((a, b) => a.order - b.order).map((team) => {
+                          {teams.sort((a, b) => getTeamTotal(b) - getTeamTotal(a)).map((team, index) => {
                             const total = getTeamTotal(team)
                             const percentage = Math.round((total / 400) * 100)
                             return (
-                              <tr key={team.id} className="grid grid-cols-7 gap-px bg-primary/10 hover:bg-primary/15">
-                                <td className="bg-white px-3 py-4 border-l-4 border-primary/40">
+                              <tr key={team.id} className="grid grid-cols-7 gap-px bg-primary/10 hover:bg-primary/15 transition-all duration-500 ease-in-out">
+                                <td className="bg-white px-3 py-4 border-l-4 border-primary/40 transition-all duration-500">
                                   <div className="flex items-center gap-2">
                                     <Badge
-                                      className={`h-6 w-6 rounded-lg p-0 flex items-center justify-center text-xs font-bold ${
+                                      className={`h-6 w-6 rounded-lg p-0 flex items-center justify-center text-xs font-bold transition-all duration-500 ${
                                         team.status === "completed"
                                           ? "bg-emerald-500 text-white"
                                           : team.status === "active"
@@ -433,14 +433,14 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
                                             : "bg-amber-500 text-white"
                                       }`}
                                     >
-                                      {team.order}
+                                      {index + 1}
                                     </Badge>
                                     <p className="font-medium text-slate-900 text-sm">{team.name}</p>
                                   </div>
                                 </td>
                                 {team.scores.map((score) => (
-                                  <td key={score.judgeId} className="bg-white px-2 py-4">
-                                    <div className="flex flex-col items-center">
+                                  <td key={score.judgeId} className="bg-white px-2 py-4 transition-all duration-500">
+                                    <div className="flex flex-col items-center transition-all duration-500">
                                       {score.score !== null ? (
                                         <>
                                           <span className="text-base font-bold text-slate-900">{score.score}</span>
@@ -460,15 +460,15 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
                                     </div>
                                   </td>
                                 ))}
-                                <td className="bg-white px-2 py-4">
-                                  <div className="text-center">
+                                <td className="bg-white px-2 py-4 transition-all duration-500">
+                                  <div className="text-center transition-all duration-500">
                                     <span className="text-lg font-bold text-slate-900">{total}</span>
                                     <br />
                                     <span className="text-xs text-slate-500">/400</span>
                                   </div>
                                 </td>
-                                <td className="bg-white px-2 py-4">
-                                  <div className="text-center">
+                                <td className="bg-white px-2 py-4 transition-all duration-500">
+                                  <div className="text-center transition-all duration-500">
                                     <span className="text-base font-semibold text-primary">{percentage}%</span>
                                   </div>
                                 </td>
