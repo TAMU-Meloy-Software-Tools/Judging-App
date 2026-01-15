@@ -1,13 +1,23 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ArrowLeft, Users, Megaphone, BadgeDollarSign, Presentation, Sparkles, Save, User, CalendarDays, MapPin } from "lucide-react"
 
 interface TeamDetailScreenProps {
@@ -25,7 +35,7 @@ const mockTeam = {
     "An innovative mobile application that helps students navigate the Texas A&M campus using AR technology and real-time crowd data to find the fastest routes to classes.",
 }
 
-const gradingCriteria = [
+const scoringCriteria = [
   {
     id: "communication",
     name: "Effective Communication",
@@ -33,7 +43,7 @@ const gradingCriteria = [
     maxScore: 25,
     icon: Megaphone,
     question:
-      "Could you comfortably restate their problem, solution, and impact in one sentence after the presentation?",
+      "Notes on clarity and messaging...",
   },
   {
     id: "funding",
@@ -42,7 +52,7 @@ const gradingCriteria = [
     maxScore: 25,
     icon: BadgeDollarSign,
     question:
-      "Would you feel confident recommending budget or resources to advance this solution given what you heard?",
+      "Thoughts on feasibility and potential...",
   },
   {
     id: "presentation",
@@ -50,7 +60,7 @@ const gradingCriteria = [
     description: "Evaluate the demo assets, storytelling, and overall delivery.",
     maxScore: 25,
     icon: Presentation,
-    question: "Did the video, prototype, and slides collectively keep you engaged and build trust in the idea?",
+    question: "Observations on delivery and engagement...",
   },
   {
     id: "overall",
@@ -58,7 +68,7 @@ const gradingCriteria = [
     description: "Reflect on the pitch strength, Q&A performance, and your gut confidence.",
     maxScore: 25,
     icon: Sparkles,
-  question: "Do you leave the table feeling inspired to see this team advance to the next stage?",
+  question: "General impressions and final thoughts...",
 },
 ] satisfies Array<{
   id: string
@@ -71,7 +81,7 @@ const gradingCriteria = [
 
 export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreenProps) {
   const [scores, setScores] = useState<Record<string, number>>(
-    gradingCriteria.reduce(
+    scoringCriteria.reduce(
       (acc, criteria) => ({
         ...acc,
         [criteria.id]: 0,
@@ -82,6 +92,9 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   const [reflections, setReflections] = useState<Record<string, string>>({})
   const [comments, setComments] = useState("")
   const [isSaving, setIsSaving] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
   // Mock sponsor data - replace with real data later
   const sponsor = { 
@@ -91,7 +104,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   }
 
   const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0)
-  const maxTotalScore = gradingCriteria.reduce((sum, criteria) => sum + criteria.maxScore, 0)
+  const maxTotalScore = scoringCriteria.reduce((sum, criteria) => sum + criteria.maxScore, 0)
 
   const handleScoreChange = (criteriaId: string, value: number[]) => {
     setScores((prev) => ({
@@ -101,9 +114,68 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   }
 
   const handleSubmit = async () => {
+    // Show confirmation dialog first
+    setShowSubmitDialog(true)
+  }
+
+  const confirmSubmit = async () => {
+    // Close confirmation dialog
+    setShowSubmitDialog(false)
+    
+    // Save scores
     setIsSaving(true)
     await new Promise((resolve) => setTimeout(resolve, 1000))
     setIsSaving(false)
+    setShowSuccessDialog(true)
+    triggerConfetti()
+  }
+
+  const triggerConfetti = () => {
+    const duration = 3000
+    const animationEnd = Date.now() + duration
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min
+    }
+
+    const interval: NodeJS.Timeout = setInterval(function() {
+      const timeLeft = animationEnd - Date.now()
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval)
+      }
+
+      const particleCount = 50 * (timeLeft / duration)
+
+      // Create confetti from multiple positions
+      if (typeof window !== 'undefined' && (window as any).confetti) {
+        (window as any).confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+        });
+        (window as any).confetti({
+          ...defaults,
+          particleCount,
+          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+        });
+      }
+    }, 250)
+  }
+
+  useEffect(() => {
+    // Load confetti library
+    if (typeof window !== 'undefined' && !(window as any).confetti) {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js'
+      script.async = true
+      document.body.appendChild(script)
+    }
+  }, [])
+
+  const handleSuccessClose = () => {
+    setShowSuccessDialog(false)
     onBack()
   }
 
@@ -112,6 +184,15 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
       ...prev,
       [criteriaId]: value,
     }))
+  }
+
+  const handleExitAttempt = () => {
+    setShowExitDialog(true)
+  }
+
+  const confirmExit = () => {
+    setShowExitDialog(false)
+    onBack()
   }
 
   return (
@@ -123,7 +204,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
             <div className="flex items-center gap-4 lg:gap-5">
               <Button
                 variant="ghost"
-                onClick={onBack}
+                onClick={handleExitAttempt}
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 text-white shadow-lg backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/20"
                 aria-label="Back to event"
               >
@@ -215,7 +296,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           </div>
 
           <div className="space-y-7">
-            {gradingCriteria.map((criteria) => {
+            {scoringCriteria.map((criteria) => {
               const Icon = criteria.icon
               const score = scores[criteria.id]
 
@@ -275,7 +356,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           <CardHeader className="p-8 pb-4">
             <CardTitle className="text-[1.75rem] font-semibold text-slate-900">Additional Comments</CardTitle>
             <CardDescription className="mt-2 text-lg text-slate-600">
-              Share any observations, coaching advice, or highlights for the organizing team.
+              Share any observations or notes for yourself.
             </CardDescription>
           </CardHeader>
           <CardContent className="p-8 pt-4">
@@ -292,7 +373,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
         <div className="mt-12 flex flex-col gap-5 sm:flex-row">
           <Button
             variant="outline"
-            onClick={onBack}
+            onClick={handleExitAttempt}
             className="h-16 flex-1 rounded-2xl border-2 border-slate-300 text-lg font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5"
           >
             Cancel
@@ -303,10 +384,119 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
             className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl disabled:opacity-70"
           >
             <Save className="mr-2 h-6 w-6" />
-            {isSaving ? "Saving..." : "Submit Grades"}
+            {isSaving ? "Saving..." : "Submit Scores"}
           </Button>
         </div>
       </main>
+
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-white/30 bg-white/90 backdrop-blur-xl shadow-2xl p-0">
+          <AlertDialogHeader className="p-8 pb-4">
+            <AlertDialogTitle className="text-3xl font-semibold text-slate-900">Exit Without Saving?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
+              Your progress will not be saved. To submit your scores, please use the Submit Scores button.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-3 p-8 pt-4 sm:flex-row">
+            <AlertDialogCancel className="h-16 flex-1 rounded-2xl border-2 border-slate-300 text-lg font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5">
+              Stay and Continue
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmExit}
+              className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Exit Without Saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-red-950/30 bg-white/80 backdrop-blur-xl shadow-2xl p-0 overflow-hidden">
+          {/* Sponsor gradient section at top */}
+          <div className="relative h-40 bg-linear-to-b from-red-600 to-red-950 overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
+            
+            <div className="relative flex items-center justify-center h-full">
+              <div className="flex shrink-0 items-center justify-center rounded-2xl py-4 px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
+                <Image
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  width={140}
+                  height={70}
+                  className="h-16 w-auto max-w-[200px] object-contain"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Success message section */}
+          <AlertDialogHeader className="p-10 pb-6 text-center flex flex-col items-center">
+            <AlertDialogTitle className="text-4xl font-bold text-slate-900 mt-4 text-center">Scores Submitted!</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed text-center">
+              Your evaluation for {mockTeam.name} has been successfully saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="p-10 pt-4">
+            <AlertDialogAction 
+              onClick={handleSuccessClose}
+              className="h-16 w-full rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Continue to Dashboard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-slate-200 bg-white/90 backdrop-blur-xl shadow-2xl">
+          <AlertDialogHeader className="p-10 pb-6">
+            <AlertDialogTitle className="text-3xl font-bold text-slate-900">Submit Scores?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
+              Are you sure you want to submit your evaluation for {mockTeam.name}? This will finalize your scores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="p-10 pt-0 flex gap-4">
+            <AlertDialogCancel 
+              className="h-16 flex-1 rounded-2xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmSubmit}
+              className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Yes, Submit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Submit Confirmation Dialog */}
+      <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-slate-200 bg-white/90 backdrop-blur-xl shadow-2xl">
+          <AlertDialogHeader className="p-10 pb-6">
+            <AlertDialogTitle className="text-3xl font-bold text-slate-900">Submit Scores?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
+              Are you sure you want to submit your evaluation for {mockTeam.name}? This will finalize your scores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="p-10 pt-0 flex gap-4">
+            <AlertDialogCancel 
+              className="h-16 flex-1 rounded-2xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmSubmit}
+              className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Yes, Submit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -26,14 +26,14 @@ const mockTeamsAggiesInvent = [
     name: "Team Alpha",
     projectTitle: "Smart Campus Navigation System",
     members: ["John Doe", "Jane Smith", "Bob Johnson"],
-    status: "not-graded",
+    status: "not-scored",
   },
   {
     id: "2",
     name: "Team Beta",
     projectTitle: "Sustainable Energy Monitor",
     members: ["Alice Williams", "Charlie Brown", "Diana Prince"],
-    status: "graded",
+    status: "scored",
     score: 87,
   },
   {
@@ -48,14 +48,14 @@ const mockTeamsAggiesInvent = [
     name: "Team Delta",
     projectTitle: "Campus Safety Alert System",
     members: ["Henry Wilson", "Ivy Chen", "Jack Taylor"],
-    status: "not-graded",
+    status: "not-scored",
   },
   {
     id: "5",
     name: "Team Epsilon",
     projectTitle: "Food Waste Reduction Platform",
     members: ["Kate Anderson", "Leo Martinez", "Maya Patel"],
-    status: "graded",
+    status: "scored",
     score: 92,
   },
 ]
@@ -67,14 +67,14 @@ const mockStudentsPWS = [
     name: "Sarah Johnson",
     projectTitle: "Community Water Purification Initiative",
     members: ["Sarah Johnson"], // Single member for consistency
-    status: "not-graded",
+    status: "not-scored",
   },
   {
     id: "2",
     name: "Marcus Chen",
     projectTitle: "Affordable Healthcare Access Platform",
     members: ["Marcus Chen"],
-    status: "graded",
+    status: "scored",
     score: 91,
   },
   {
@@ -89,14 +89,14 @@ const mockStudentsPWS = [
     name: "David Thompson",
     projectTitle: "Sustainable Agriculture Solutions",
     members: ["David Thompson"],
-    status: "not-graded",
+    status: "not-scored",
   },
   {
     id: "5",
     name: "Jessica Martinez",
     projectTitle: "Mental Health Support Network",
     members: ["Jessica Martinez"],
-    status: "graded",
+    status: "scored",
     score: 88,
   },
 ]
@@ -112,11 +112,11 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
   // Use appropriate mock data based on event type
   const mockTeams = isPWSEvent ? mockStudentsPWS : mockTeamsAggiesInvent
   
-  const gradedCount = mockTeams.filter((t) => t.status === "graded").length
+  const scoredCount = mockTeams.filter((t) => t.status === "scored").length
   const totalCount = mockTeams.length
   const inProgressCount = mockTeams.filter((t) => t.status === "in-progress").length
-  const notGradedCount = totalCount - gradedCount - inProgressCount
-  const completionPercent = Math.round((gradedCount / totalCount) * 100)
+  const notScoredCount = totalCount - scoredCount - inProgressCount
+  const completionPercent = Math.round((scoredCount / totalCount) * 100)
   // Sponsor data based on event type
   const sponsor = isPWSEvent
     ? { 
@@ -133,9 +133,9 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
       }
 
   const statusCopy: Record<typeof mockTeams[number]["status"], { label: string; tone: string }> = {
-    graded: { label: "Graded", tone: "text-emerald-600" },
+    scored: { label: "Scored", tone: "text-emerald-600" },
     "in-progress": { label: "In Progress", tone: "text-amber-500" },
-    "not-graded": { label: "Not Graded", tone: "text-slate-500" },
+    "not-scored": { label: "Not Scored", tone: "text-slate-500" },
   }
 
   return (
@@ -293,8 +293,8 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">{participantsLabel} graded</p>
-                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{gradedCount}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">{participantsLabel} scored</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{scoredCount}</p>
               </div>
             </div>
           </div>
@@ -319,8 +319,8 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 <Circle className="h-5 w-5 text-slate-500" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Awaiting judging</p>
-                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{notGradedCount}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Awaiting scoring</p>
+                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{notScoredCount}</p>
               </div>
             </div>
           </div>
@@ -331,7 +331,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
             <div>
               <h2 className="text-3xl font-semibold text-slate-900">{participantLabel} roster</h2>
               <p className="text-sm text-slate-500">
-                Tracking {gradedCount} graded, {inProgressCount} in progress, {notGradedCount} awaiting review
+                Tracking {scoredCount} scored, {inProgressCount} in progress, {notScoredCount} awaiting review
               </p>
             </div>
           </div>
@@ -363,7 +363,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                     <Badge
                       className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-semibold text-slate-600 shadow-sm"
                     >
-                      {team.status === "graded" ? (
+                      {team.status === "scored" ? (
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                       ) : team.status === "in-progress" ? (
                         <Clock className="h-4 w-4 text-amber-500" />
@@ -372,7 +372,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                       )}
                       <span className={statusCopy[team.status].tone}>{statusCopy[team.status].label}</span>
                     </Badge>
-                    {team.status === "graded" && typeof team.score === "number" ? (
+                    {team.status === "scored" && typeof team.score === "number" ? (
                       <Badge className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
                         Score {team.score}
                       </Badge>
