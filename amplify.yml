@@ -10,11 +10,10 @@ frontend:
       commands:
         - pnpm run build
   artifacts:
-    baseDirectory: meloy-judge-app/.next
+    baseDirectory: meloy-judge-app/out
     files:
       - '**/*'
   cache:
     paths:
       - meloy-judge-app/node_modules/**/*
-      - meloy-judge-app/.next/cache/**/*
       - ~/.pnpm-store/**/*
