@@ -10,6 +10,16 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   ArrowLeft,
   Calendar,
   MapPin,
@@ -116,6 +126,8 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
   // PWS Student State
   const [newStudentName, setNewStudentName] = useState("")
   const [newStudentEmail, setNewStudentEmail] = useState("")
+  const [showExitDialog, setShowExitDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   // Determine if event is PWS (individual students) or team-based
   const isPWSEvent = eventType === "problems-worth-solving"
@@ -216,6 +228,25 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
     return judges.find((j) => j.id === judgeId)?.name || "Unknown"
   }
 
+  const handleExitAttempt = () => {
+    setShowExitDialog(true)
+  }
+
+  const confirmExit = () => {
+    setShowExitDialog(false)
+    onBack()
+  }
+
+  const handleDeleteEvent = () => {
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = () => {
+    console.log('Deleting event...')
+    setShowDeleteDialog(false)
+    onBack()
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative z-30 border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl overflow-hidden">
@@ -225,7 +256,7 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
             <div className="flex items-center gap-4 lg:gap-5">
               <Button
                 variant="ghost"
-                onClick={onBack}
+                onClick={handleExitAttempt}
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-white/30 bg-white/10 text-white shadow-lg backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-white/20"
               >
                 <ArrowLeft className="h-7 w-7" />
@@ -251,8 +282,16 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
               </div>
               
               <Button
+                onClick={handleDeleteEvent}
+                variant="ghost"
+                className="h-11 rounded-xl border-2 border-white/30 bg-red-600/20 px-5 lg:px-6 text-base font-semibold text-white shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-600 hover:text-white hover:border-white/50"
+              >
+                <Trash2 className="mr-2 h-5 w-5" />
+                Delete Event
+              </Button>
+              <Button
                 onClick={handleSave}
-                className="h-11 rounded-xl bg-white px-5 lg:px-6 text-base font-semibold text-primary shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                className="h-11 rounded-xl bg-white px-5 lg:px-6 text-base font-semibold text-primary shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/95"
               >
                 <Save className="mr-2 h-5 w-5" />
                 Save Changes
@@ -263,56 +302,6 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
       </header>
 
       <main className="relative mx-auto max-w-7xl px-6 py-5 lg:py-6 lg:px-8">
-        {/* Event Status Banner */}
-        <Card className="mb-8 overflow-hidden rounded-[28px] border-none bg-linear-to-br from-primary/95 via-primary/90 to-[#3d0000] text-white shadow-2xl">
-          <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full border border-white/10 bg-white/10 blur-2xl" />
-          <CardHeader className="relative p-8 pb-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <Badge className="mb-3 w-fit rounded-full border border-white/20 bg-white/15 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white">
-                  Currently Managing
-                </Badge>
-                <CardTitle className="text-3xl font-semibold">{eventName}</CardTitle>
-                <CardDescription className="mt-2 text-base text-white/80">{eventDescription}</CardDescription>
-              </div>
-              <Badge className="shrink-0 rounded-full border border-emerald-200/30 bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-white shadow-sm">
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Active
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="relative flex flex-wrap gap-6 p-8 pt-4">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-4">
-              <Calendar className="h-5 w-5" />
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Event Date</p>
-                <p className="text-lg font-semibold">{eventDuration}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-4">
-              <MapPin className="h-5 w-5" />
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Location</p>
-                <p className="text-lg font-semibold">{eventLocation}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-4">
-              <Users className="h-5 w-5" />
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Teams</p>
-                <p className="text-lg font-semibold">{teams.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-4">
-              <Award className="h-5 w-5" />
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-white/60">Judges</p>
-                <p className="text-lg font-semibold">{judges.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <Tabs defaultValue="details" className="w-full">
           <TabsList className="grid h-16 w-full grid-cols-4 rounded-2xl border border-slate-200 bg-white/80 p-2 shadow-lg backdrop-blur">
             <TabsTrigger
@@ -373,6 +362,25 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
 
                   <div className="space-y-3">
                     <Label className="text-base font-semibold uppercase tracking-[0.15em] text-slate-700">Event Type</Label>
+                    <div className="relative overflow-hidden rounded-2xl border-2 border-primary/20 bg-linear-to-br from-white to-primary/5 p-4 shadow-lg w-fit">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+                      <div className="relative flex items-center justify-center">
+                        <div className="flex items-center justify-center rounded-2xl border-2 border-primary/10 bg-white p-4 shadow-md">
+                          <Image
+                            src={eventTypes.find(t => t.value === eventType)?.logo || ""}
+                            alt={eventTypes.find(t => t.value === eventType)?.label || ""}
+                            width={200}
+                            height={100}
+                            className="h-16 w-auto max-w-[280px] object-contain"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Hidden event type selector for reference
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold uppercase tracking-[0.15em] text-slate-700">Event Type</Label>
                     <div className="grid grid-cols-2 gap-4">
                       {eventTypes.map((type) => (
                         <button
@@ -399,6 +407,7 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
                       ))}
                     </div>
                   </div>
+                  */}
 
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-3">
@@ -884,6 +893,52 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
           </div>
         </Tabs>
       </main>
+
+      {/* Exit Confirmation Dialog */}
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-white/30 bg-white/90 backdrop-blur-xl shadow-2xl p-0">
+          <AlertDialogHeader className="p-8 pb-4">
+            <AlertDialogTitle className="text-3xl font-semibold text-slate-900">Leave Without Saving?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
+              Any unsaved changes will be lost. Make sure to save your changes before leaving.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-3 p-8 pt-4 sm:flex-row">
+            <AlertDialogCancel className="h-16 flex-1 rounded-2xl border-2 border-slate-300 text-lg font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5">
+              Stay and Continue
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmExit}
+              className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Leave Without Saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Event Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-red-200 bg-white/90 backdrop-blur-xl shadow-2xl p-0">
+          <AlertDialogHeader className="p-8 pb-4">
+            <AlertDialogTitle className="text-3xl font-semibold text-red-900">Delete Event?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-slate-900">{eventName}</span>? This action cannot be undone and will remove all teams, judges, and scoring data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-3 p-8 pt-4 sm:flex-row">
+            <AlertDialogCancel className="h-16 flex-1 rounded-2xl border-2 border-slate-300 text-lg font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="h-16 flex-1 rounded-2xl bg-red-600 text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-xl"
+            >
+              Yes, Delete Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
