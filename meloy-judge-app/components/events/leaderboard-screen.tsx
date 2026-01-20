@@ -392,7 +392,7 @@ function DuringJudgingView() {
                   alt="ExxonMobil"
                   width={120}
                   height={60}
-                  className="relative h-14 lg:h-16 w-auto max-w-[180px] lg:max-w-[220px] object-contain"
+                  className="relative h-14 lg:h-16 w-auto max-w-45 lg:max-w-55 object-contain"
                 />
               </div>
               <div>
@@ -610,7 +610,7 @@ function PostJudgingView() {
                   alt="ExxonMobil"
                   width={120}
                   height={60}
-                  className="relative h-14 lg:h-16 w-auto max-w-[180px] lg:max-w-[220px] object-contain"
+                  className="relative h-14 lg:h-16 w-auto max-w-45 lg:max-w-55 object-contain"
                 />
               </div>
               <div>

@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Meloy Judging Portal - Lambda API Backend
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs18.x
+    MemorySize: 512
+    Environment:
+      Variables:
+        RDS_SECRET_ARN: !Ref RDSSecretArn
+        JWT_SECRET_ARN: !Ref JWTSecretArn
+        CAS_SERVICE_URL: !Ref CASServiceUrl
+        NODE_ENV: production
+    Architectures:
+      - x86_64
+
+Parameters:
+  RDSSecretArn:
+    Type: String
+    Description: ARN of the Secrets Manager secret containing RDS credentials
+    Default: arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:meloyjudge/rds/credentials
+
+  JWTSecretArn:
+    Type: String
+    Description: ARN of the Secrets Manager secret containing JWT signing key
+    Default: arn:aws:secretsmanager:us-east-1:ACCOUNT_ID:secret:meloyjudge/jwt/secret
+
+  CASServiceUrl:
+    Type: String
+    Description: CAS callback service URL for TAMU authentication
+    Default: https://your-app.amplifyapp.com/auth/callback
+
+Resources:
+  # HTTP API Gateway
+  MeloyJudgeApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
+      CorsConfiguration:
+        AllowOrigins:
+          - 'https://your-app.amplifyapp.com'
+          - 'http://localhost:3000'
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+        MaxAge: 300
+      Auth:
+        Authorizers:
+          JwtAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: meloy-judge-portal
+              audience:
+                - meloy-judge-api
+        DefaultAuthorizer: JwtAuthorizer
+
+  # Lambda Execution Role
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref RDSSecretArn
+                  - !Ref JWTSecretArn
+
+  # ==================== AUTH ENDPOINTS ====================
+
+  CasCallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/auth/cas-callback.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        CasCallback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MeloyJudgeApi
+            Path: /auth/cas-callback
+            Method: GET
+            Auth:
+              Authorizer: NONE
+
+  GetMeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/auth/get-me.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetMe:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MeloyJudgeApi
+            Path: /auth/me
+            Method: GET
+
+  LogoutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/auth/logout.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        Logout:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MeloyJudgeApi
+            Path: /auth/logout
+            Method: POST
+
+  # ==================== EVENT ENDPOINTS ====================
+
+  ListEventsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/events/list.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ListEvents:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MeloyJudgeApi
+            Path: /events
+            Method: GET
+
+  GetEventFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/events/detail.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MeloyJudgeApi
+            Path: /events/{id}
+            Method: GET
+
+Outputs:
+  MeloyJudgeApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${MeloyJudgeApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+  
+  MeloyJudgeApiId:
+    Description: API Gateway ID
+    Value: !Ref MeloyJudgeApi

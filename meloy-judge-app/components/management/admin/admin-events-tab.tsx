@@ -53,7 +53,7 @@ export function AdminEventsTab({ events, recentActivity, onCreateEvent, onManage
               <Card
                 key={event.id}
                 onClick={() => onManageEvent(event.id)}
-                className="group relative cursor-pointer overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 ring-1 ring-primary/10 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:ring-primary/25 hover:shadow-2xl p-0 w-[380px] shrink-0"
+                className="group relative cursor-pointer overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 ring-1 ring-primary/10 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:ring-primary/25 hover:shadow-2xl p-0 w-95 shrink-0"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
               {/* Sponsor gradient section at top */}
@@ -86,7 +86,7 @@ export function AdminEventsTab({ events, recentActivity, onCreateEvent, onManage
                     alt="Meloy Program"
                     width={80}
                     height={40}
-                    className="h-10 w-auto max-w-[120px] object-contain"
+                    className="h-10 w-auto max-w-30 object-contain"
                   />
                 </div>
               </div>
@@ -162,7 +162,7 @@ export function AdminEventsTab({ events, recentActivity, onCreateEvent, onManage
               const Icon = item.icon
 
               return (
-                <div key={item.id} className="min-w-[340px] shrink-0">
+                <div key={item.id} className="min-w-85 shrink-0">
                   <div className="rounded-2xl border border-slate-200/60 bg-slate-50/70 px-5 py-4 h-full">
                     <div className="flex items-start gap-3 mb-3">
                       <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-md ring-2 ring-primary/20`}>

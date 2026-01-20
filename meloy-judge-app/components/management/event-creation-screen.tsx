@@ -513,7 +513,7 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
                               alt={sponsorName || 'Sponsor'}
                               width={120}
                               height={60}
-                              className="relative h-14 lg:h-16 w-auto max-w-[180px] lg:max-w-[220px] object-contain"
+                              className="relative h-14 lg:h-16 w-auto max-w-45 lg:max-w-60 object-contain"
                             />
                           ) : (
                             <div className="h-14 w-32 flex items-center justify-center text-slate-400 text-sm">No logo</div>
@@ -556,7 +556,7 @@ export function EventCreationScreen({ onBack, onCreateEvent }: EventCreationScre
                 <Label className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Primary Judging Account
                 </Label>
-                <div className="max-h-[400px] overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                <div className="max-h-100 overflow-y-auto rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
                   <div className="grid gap-3">
                     {availableJudgingAccounts.map((account) => (
                       <button

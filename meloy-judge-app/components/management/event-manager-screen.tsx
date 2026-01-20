@@ -371,7 +371,7 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
                             alt={eventTypes.find(t => t.value === eventType)?.label || ""}
                             width={200}
                             height={100}
-                            className="h-16 w-auto max-w-[280px] object-contain"
+                            className="h-16 w-auto max-w-70 object-contain"
                           />
                         </div>
                       </div>
@@ -448,7 +448,7 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
                       value={eventDescription}
                       onChange={(e) => setEventDescription(e.target.value)}
                       placeholder="Describe your event..."
-                      className="min-h-[120px] rounded-xl border-slate-200 px-4 py-3 text-lg shadow-inner"
+                      className="min-h-30 rounded-xl border-slate-200 px-4 py-3 text-lg shadow-inner"
                     />
                   </div>
                 </CardContent>
@@ -589,7 +589,7 @@ export function EventManagerScreen({ eventId, onBack, onSave }: EventManagerScre
                                   alt={sponsorName}
                                   width={120}
                                   height={60}
-                                  className="relative h-14 lg:h-16 w-auto max-w-[180px] lg:max-w-[220px] object-contain"
+                                  className="relative h-14 lg:h-16 w-auto max-w-45 lg:max-w-55 object-contain"
                                 />
                               ) : (
                                 <div className="h-14 w-32 flex items-center justify-center text-slate-400 text-sm">No logo</div>

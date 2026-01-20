@@ -236,12 +236,12 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                     alt={sponsor.name ?? "Sponsor logo"}
                     width={120}
                     height={60}
-                    className="relative h-14 lg:h-16 w-auto max-w-[180px] lg:max-w-[220px] object-contain"
+                    className="relative h-14 lg:h-16 w-auto max-w-45 lg:max-w-55 object-contain"
                   />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs uppercase tracking-[0.12em] text-white/80">Presented by</p>
-                  <p className="text-xl lg:text-2xl font-semibold text-white leading-tight max-w-[400px] lg:max-w-[420px] wrap-break-word drop-shadow-sm">{sponsor.name}</p>
+                  <p className="text-xl lg:text-2xl font-semibold text-white leading-tight max-w-100 lg:max-w-105 wrap-break-word drop-shadow-sm">{sponsor.name}</p>
                 </div>
               </div>
 

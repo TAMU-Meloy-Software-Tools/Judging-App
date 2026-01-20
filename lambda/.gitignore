@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.aws-sam/
+*.log
+.env
+.env.local
+*.zip
+coverage/
+.DS_Store

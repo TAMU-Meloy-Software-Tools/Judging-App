@@ -144,7 +144,7 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
                     alt={event.type === "problems-worth-solving" ? "Texas A&M University" : "ExxonMobil"}
                     width={80}
                     height={40}
-                    className="h-10 w-auto max-w-[120px] object-contain"
+                    className="h-10 w-auto max-w-30 object-contain"
                   />
                 </div>
               </div>
