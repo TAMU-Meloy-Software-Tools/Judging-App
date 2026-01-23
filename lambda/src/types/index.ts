@@ -27,6 +27,8 @@ export interface Event {
   min_team_size?: number;
   max_teams?: number;
   sponsor_id?: string;
+  judging_phase: 'not-started' | 'in-progress' | 'ended';
+  current_active_team_id?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -35,8 +37,10 @@ export interface Team {
   id: string;
   event_id: string;
   name: string;
+  project_title?: string;
   description?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  presentation_order?: number;
+  status: 'waiting' | 'active' | 'completed' | 'pending' | 'approved' | 'rejected';
   project_url?: string;
   created_at: Date;
   updated_at: Date;
@@ -45,9 +49,9 @@ export interface Team {
 export interface TeamMember {
   id: string;
   team_id: string;
-  user_id: string;
-  role: 'leader' | 'member';
-  joined_at: Date;
+  name: string;
+  email?: string;
+  created_at: Date;
 }
 
 export interface RubricCriteria {
@@ -98,9 +102,10 @@ export interface JudgeComment {
 
 export interface Sponsor {
   id: string;
-  event_id: string;
   name: string;
   logo_url?: string;
+  website_url?: string;
+  tier?: 'platinum' | 'gold' | 'silver' | 'bronze';
   primary_color: string;
   secondary_color: string;
   text_color: string;

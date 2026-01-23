@@ -53,8 +53,13 @@ export async function handler(
           'name', s.name,
           'logo_url', s.logo_url,
           'website_url', s.website_url,
-          'tier', s.tier
-        ) as sponsor
+          'tier', s.tier,
+          'primary_color', s.primary_color,
+          'secondary_color', s.secondary_color,
+          'text_color', s.text_color
+        ) as sponsor,
+        (SELECT COUNT(*) FROM teams WHERE event_id = e.id) as teams_count,
+        (SELECT COUNT(*) FROM event_judges WHERE event_id = e.id) as judges_count
       FROM events e
       LEFT JOIN sponsors s ON e.sponsor_id = s.id
       WHERE ${conditions.join(' AND ')}
@@ -79,6 +84,8 @@ export async function handler(
         minTeamSize: e.min_team_size,
         maxTeams: e.max_teams,
         sponsor: e.sponsor,
+        teamsCount: (e as any).teams_count,
+        judgesCount: (e as any).judges_count,
         createdAt: e.created_at,
       })),
       total: events.length,

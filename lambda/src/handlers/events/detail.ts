@@ -34,7 +34,10 @@ export async function handler(
           'name', s.name,
           'logo_url', s.logo_url,
           'website_url', s.website_url,
-          'tier', s.tier
+          'tier', s.tier,
+          'primary_color', s.primary_color,
+          'secondary_color', s.secondary_color,
+          'text_color', s.text_color
         ) as sponsor
       FROM events e
       LEFT JOIN sponsors s ON e.sponsor_id = s.id
@@ -70,9 +73,9 @@ export async function handler(
     }>(
       `SELECT 
         COUNT(*) as total_submissions,
-        COUNT(CASE WHEN s.status = 'completed' THEN 1 END) as completed_submissions
-      FROM submissions s
-      JOIN teams t ON s.team_id = t.id
+        COUNT(CASE WHEN ss.submitted_at IS NOT NULL THEN 1 END) as completed_submissions
+      FROM score_submissions ss
+      JOIN teams t ON ss.team_id = t.id
       WHERE t.event_id = $1`,
       [eventId]
     );
