@@ -31,12 +31,8 @@ export function DashboardScreen({ onSelectEvent, onNavigate, isAdmin }: Dashboar
           getCurrentUser()
         ])
         setEvents(eventsData.events)
-        // Handle both real users (with first_name/last_name) and DEV_MODE users (with netId)
-        const userName = userData.user.first_name && userData.user.last_name
-          ? `${userData.user.first_name} ${userData.user.last_name}`
-          : userData.user.netid || 'User'
         setUser({
-          name: userName,
+          name: userData.user.name || 'User',
           role: userData.user.role
         })
       } catch (err) {

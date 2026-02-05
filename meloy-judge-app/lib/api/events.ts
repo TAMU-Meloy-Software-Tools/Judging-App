@@ -2,7 +2,7 @@
  * Events API endpoints
  */
 
-import { get, post, put, del } from './client';
+import { get, post, put, patch, del } from './client';
 import type {
     EventsResponse,
     Event,
@@ -10,6 +10,7 @@ import type {
     LeaderboardResponse,
     InsightsResponse,
     JudgesOnlineResponse,
+    JudgeProgressResponse,
 } from '../types/api';
 
 /**
@@ -59,10 +60,22 @@ export async function deleteEvent(id: string): Promise<void> {
 }
 
 /**
- * Get teams for an event
+ * Get all teams for an event
+ * @param eventId - The event ID
+ * @param options - Query options
+ * @param options.activeOnly - If true, only returns teams with status='active' (for judges)
+ * @param options.judgeId - Optional judge profile ID to filter has_scored status
  */
-export async function getEventTeams(eventId: string): Promise<TeamsResponse> {
-    return get<TeamsResponse>(`/events/${eventId}/teams`);
+export async function getEventTeams(
+    eventId: string,
+    options?: { activeOnly?: boolean; judgeId?: string }
+): Promise<TeamsResponse> {
+    const params = new URLSearchParams();
+    if (options?.activeOnly) params.append('activeOnly', 'true');
+    if (options?.judgeId) params.append('judgeId', options.judgeId);
+    
+    const query = params.toString();
+    return get<TeamsResponse>(`/events/${eventId}/teams${query ? `?${query}` : ''}`);
 }
 
 /**
@@ -106,12 +119,13 @@ export async function updateActiveTeam(
 
 /**
  * Update judging phase (moderator)
+ * Note: This wraps the main updateEventPhase function for backwards compatibility
  */
 export async function updateJudgingPhase(
     eventId: string,
     phase: string
 ): Promise<{ event: Event }> {
-    return put<{ event: Event }>(`/events/${eventId}/judging-phase`, {
+    return patch<{ event: Event }>(`/events/${eventId}/phase`, {
         judging_phase: phase,
     });
 }
@@ -125,7 +139,12 @@ export async function getModeratorStatus(eventId: string): Promise<any> {
 
 /**
  * Get judge's progress for an event
+ * @param eventId - The event ID
+ * @param judgeId - The judge profile ID
  */
-export async function getMyProgress(eventId: string): Promise<any> {
-    return get<any>(`/events/${eventId}/my-progress`);
+export async function getMyProgress(
+    eventId: string,
+    judgeId: string
+): Promise<any> {
+    return get<any>(`/events/${eventId}/my-progress?judgeId=${judgeId}`);
 }

@@ -11,178 +11,140 @@ export const handler = async (
     await transaction(async (client) => {
       // Insert test users
       await client.query(`
-        INSERT INTO users (netid, email, first_name, last_name, role) VALUES
-        ('admin001', 'admin@tamu.edu', 'John', 'Admin', 'admin'),
-        ('mod001', 'moderator@tamu.edu', 'Jane', 'Moderator', 'moderator'),
-        ('judge001', 'judge1@tamu.edu', 'Mike', 'Judge', 'judge'),
-        ('judge002', 'judge2@tamu.edu', 'Sarah', 'Smith', 'judge'),
-        ('part001', 'participant1@tamu.edu', 'Bob', 'Builder', 'participant'),
-        ('part002', 'participant2@tamu.edu', 'Alice', 'Developer', 'participant'),
-        ('part003', 'participant3@tamu.edu', 'Charlie', 'Coder', 'participant')
+        INSERT INTO users (id, email, password_hash, name, role, is_active) VALUES
+        ('00000000-0000-0000-0000-000000000001', 'admin@tamu.edu', '$2b$10$placeholder', 'Admin User', 'admin', true),
+        ('00000000-0000-0000-0000-000000000002', 'moderator@tamu.edu', '$2b$10$placeholder', 'Event Moderator', 'moderator', true),
+        ('00000000-0000-0000-0000-000000000003', 'judges-hackathon@tamu.edu', '$2b$10$placeholder', 'Hackathon Judges', 'judge', true)
+        ON CONFLICT (id) DO NOTHING
       `);
 
-      // Insert sponsor
+      // Insert sponsors
       await client.query(`
-        INSERT INTO sponsors (name, logo_url, website_url, tier, primary_color, secondary_color, text_color) VALUES
-        ('TAMU Engineering', 'https://example.com/tamu-logo.png', 'https://engineering.tamu.edu', 'platinum', '#500000', '#FFFFFF', '#FFFFFF')
+        INSERT INTO sponsors (id, name, logo_url, primary_color, secondary_color, text_color) VALUES
+        ('00000000-0000-0000-0000-000000000010', 'ExxonMobil', '/ExxonLogo.png', '#b91c1c', '#7f1d1d', '#FFFFFF')
+        ON CONFLICT (id) DO NOTHING
       `);
 
-      // Insert test events
+      // Insert test event
       await client.query(`
-        INSERT INTO events (name, description, event_type, status, location, start_date, end_date, registration_deadline, max_team_size, min_team_size, max_teams, sponsor_id, judging_phase)
-        VALUES
-        (
-          'Spring 2026 Hackathon',
-          'Annual spring coding competition focusing on web development and AI',
-          'hackathon',
-          'active',
-          'Zachry Engineering Center',
+        INSERT INTO events (id, name, event_type, duration, start_date, end_date, location, description, status, judging_phase, sponsor_id, created_by)
+        VALUES (
+          '00000000-0000-0000-0000-000000000100',
+          'Spring 2026 Aggies Invent',
+          'aggies-invent',
+          '48 hours',
           '2026-03-15 09:00:00',
-          '2026-03-15 18:00:00',
-          '2026-03-10 23:59:59',
-          4,
-          2,
-          20,
-          (SELECT id FROM sponsors WHERE name = 'TAMU Engineering'),
-          'in-progress'
-        ),
-        (
-          'Summer Design Challenge',
-          'UI/UX design competition for mobile applications',
-          'design_competition',
-          'upcoming',
-          'Memorial Student Center',
-          '2026-06-20 10:00:00',
-          '2026-06-20 17:00:00',
-          '2026-06-15 23:59:59',
-          3,
-          1,
-          15,
-          NULL,
-          'not-started'
+          '2026-03-17 17:00:00',
+          'Zachry Engineering Center',
+          'Annual spring innovation competition',
+          'active',
+          'in-progress',
+          '00000000-0000-0000-0000-000000000010',
+          '00000000-0000-0000-0000-000000000001'
         )
+        ON CONFLICT (id) DO NOTHING
       `);
 
-      // Get event and user IDs
-      const hackathon = await client.query(`SELECT id FROM events WHERE name = 'Spring 2026 Hackathon'`);
-      const hackathonId = hackathon.rows[0]?.id;
+      // Insert judge profiles
+      // For testing in DEV_MODE, we assign profiles to the admin user (id: 000...001)
+      // In production, these would be assigned to dedicated judge accounts
+      console.log('Inserting judge profiles...');
+      const judgeResult = await client.query(`
+        INSERT INTO event_judges (id, event_id, user_id, name) VALUES
+        ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Dr. Sarah Chen'),
+        ('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Prof. Michael Roberts'),
+        ('00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Dr. Emily Watson'),
+        ('00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Mr. James Miller')
+        RETURNING id, name
+      `);
+      console.log('Inserted judge profiles:', judgeResult.rows);
 
-      // Insert rubric criteria (4 default scoring categories)
+      // Insert rubric criteria
       await client.query(`
         INSERT INTO rubric_criteria (name, short_name, description, max_score, display_order, icon_name, guiding_question) VALUES
         ('Effective Communication', 'Communication', 'Was the problem urgent, the solution convincing, and the impact tangible?', 25, 1, 'Megaphone', 'Notes on clarity and messaging...'),
         ('Would Fund/Buy Solution', 'Funding', 'Consider technical feasibility, commercial viability, and novelty of the approach.', 25, 2, 'BadgeDollarSign', 'Thoughts on feasibility and potential...'),
         ('Presentation Quality', 'Presentation', 'Evaluate the demo assets, storytelling, and overall delivery.', 25, 3, 'Presentation', 'Observations on delivery and engagement...'),
         ('Team Cohesion', 'Cohesion', 'Reflect on the pitch strength, Q&A performance, and your gut confidence.', 25, 4, 'Sparkles', 'General impressions and final thoughts...')
+        ON CONFLICT (display_order) DO NOTHING
       `);
 
-      if (hackathonId) {
-        const adminId = (await client.query(`SELECT id FROM users WHERE netid = 'admin001'`)).rows[0]?.id;
-        const judge1Id = (await client.query(`SELECT id FROM users WHERE netid = 'judge001'`)).rows[0]?.id;
+      // Insert teams
+      await client.query(`
+        INSERT INTO teams (id, event_id, name, project_title, description, presentation_order, status) VALUES
+        ('00000000-0000-0000-0000-000000000301', '00000000-0000-0000-0000-000000000100', 'Code Warriors', 'AI Task Manager', 'Building an AI-powered task manager for students', 1, 'completed'),
+        ('00000000-0000-0000-0000-000000000302', '00000000-0000-0000-0000-000000000100', 'Debug Squad', 'CollabCode', 'Creating a collaborative coding platform', 2, 'completed'),
+        ('00000000-0000-0000-0000-000000000303', '00000000-0000-0000-0000-000000000100', 'Innovation Hub', 'SmartCampus', 'IoT solution for campus resource management', 3, 'active')
+        ON CONFLICT (id) DO NOTHING
+      `);
 
-        // Insert teams with project titles and presentation order
-        const teamResult = await client.query(`
-          INSERT INTO teams (event_id, name, project_title, description, status, presentation_order) VALUES
-          ($1, 'Code Warriors', 'AI-Powered Task Manager', 'Building an intelligent task prioritization system', 'active', 1),
-          ($1, 'Debug Squad', 'CollabCode Platform', 'Creating a real-time collaborative coding environment', 'completed', 2),
-          ($1, 'IoT Innovators', 'Smart Campus Solution', 'Developing IoT sensors for energy monitoring', 'waiting', 3)
-          RETURNING id
-        `, [hackathonId]);
+      // Insert team members
+      await client.query(`
+        INSERT INTO team_members (team_id, name, email) VALUES
+        ('00000000-0000-0000-0000-000000000301', 'Alice Johnson', 'alice@tamu.edu'),
+        ('00000000-0000-0000-0000-000000000301', 'Bob Smith', 'bob@tamu.edu'),
+        ('00000000-0000-0000-0000-000000000302', 'David Lee', 'david@tamu.edu'),
+        ('00000000-0000-0000-0000-000000000302', 'Eva Martinez', 'eva@tamu.edu'),
+        ('00000000-0000-0000-0000-000000000303', 'Frank Wilson', 'frank@tamu.edu')
+      `);
 
-        if (teamResult.rows.length > 0) {
-          const team1Id = teamResult.rows[0].id;
-          const team2Id = teamResult.rows[1]?.id;
+      // Get rubric criteria IDs
+      const criteria = await client.query('SELECT id FROM rubric_criteria ORDER BY display_order');
+      const [comm_id, fund_id, pres_id, cohe_id] = criteria.rows.map(r => r.id);
 
-          // Add team members (non-registered participants with name/email only)
-          await client.query(`
-            INSERT INTO team_members (team_id, name, email) VALUES
-            ($1, 'Bob Builder', 'bob.builder@tamu.edu'),
-            ($1, 'Alice Developer', 'alice.dev@tamu.edu')
-          `, [team1Id]);
+      // Insert score submissions and scores for Code Warriors (fully scored)
+      const sub1 = await client.query(`
+        INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+        VALUES ('00000000-0000-0000-0000-000000000401', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000301', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour 45 minutes', 900)
+        RETURNING id
+      `);
+      const sub1_id = sub1.rows[0].id;
 
-          if (team2Id) {
-            await client.query(`
-              INSERT INTO team_members (team_id, name, email) VALUES
-              ($1, 'Charlie Coder', 'charlie.code@tamu.edu'),
-              ($1, 'Diana Designer', 'diana.design@tamu.edu')
-            `, [team2Id]);
-          }
+      await client.query(`
+        INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+        ($1, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', $2, 22, 'Excellent problem articulation'),
+        ($1, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', $3, 24, 'Very viable business model'),
+        ($1, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', $4, 21, 'Good demo'),
+        ($1, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', $5, 23, 'Strong team dynamics')
+      `, [sub1_id, comm_id, fund_id, pres_id, cohe_id]);
 
-          // Add judges to event
-          if (adminId && judge1Id) {
-            await client.query(`
-              INSERT INTO event_judges (event_id, user_id, assigned_by) VALUES
-              ($1, $2, $3)
-            `, [hackathonId, judge1Id, adminId]);
+      await client.query(`
+        INSERT INTO judge_comments (submission_id, judge_id, team_id, comments)
+        VALUES ($1, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', 'Outstanding project with real market potential.')
+      `, [sub1_id]);
 
-            // Create judge session (simulating active judge)
-            await client.query(`
-              INSERT INTO judge_sessions (event_id, user_id, logged_in_at, last_activity) VALUES
-              ($1, $2, NOW() - INTERVAL '2 hours', NOW())
-            `, [hackathonId, judge1Id]);
-          }
+      // Judge sessions
+      await client.query(`
+        INSERT INTO judge_sessions (event_id, judge_id, logged_in_at, last_activity, logged_out_at) VALUES
+        ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000201', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '2 minutes', NULL),
+        ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000202', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 minute', NULL)
+      `);
 
-          // Add score submission and scores for completed team
-          if (judge1Id && team2Id) {
-            const submissionResult = await client.query(`
-              INSERT INTO score_submissions (user_id, event_id, team_id, started_at, submitted_at, time_spent_seconds) VALUES
-              ($1, $2, $3, NOW() - INTERVAL '25 minutes', NOW(), 1500)
-              RETURNING id
-            `, [judge1Id, hackathonId, team2Id]);
-
-            if (submissionResult.rows.length > 0) {
-              const submissionId = submissionResult.rows[0].id;
-              
-              // Get rubric criteria IDs
-              const criteria = await client.query(`SELECT id, short_name FROM rubric_criteria ORDER BY display_order`);
-              
-              if (criteria.rows.length === 4) {
-                // Add scores for all 4 criteria
-                await client.query(`
-                  INSERT INTO scores (submission_id, user_id, team_id, rubric_criteria_id, score, reflection) VALUES
-                  ($1, $2, $3, $4, 22, 'Clear explanation of problem and solution. Good use of visuals.'),
-                  ($1, $2, $3, $5, 21, 'Strong technical feasibility. Market potential needs more research.'),
-                  ($1, $2, $3, $6, 23, 'Excellent demo with live coding. Very engaging presentation.'),
-                  ($1, $2, $3, $7, 21, 'Team worked well together. Good Q&A responses.')
-                `, [submissionId, judge1Id, team2Id, criteria.rows[0].id, criteria.rows[1].id, criteria.rows[2].id, criteria.rows[3].id]);
-
-                // Add overall judge comment
-                await client.query(`
-                  INSERT INTO judge_comments (submission_id, user_id, team_id, comments) VALUES
-                  ($1, $2, $3, 'Impressive project with strong technical implementation. The team showed great collaboration and communication skills. Consider expanding on the business model for next round.')
-                `, [submissionId, judge1Id, team2Id]);
-              }
-            }
-          }
-
-          // Add activity log entries
-          await client.query(`
-            INSERT INTO activity_log (event_id, user_id, title, description, activity_type, icon_name, tone) VALUES
-            ($1, $2, 'Event Started', 'Spring 2026 Hackathon judging phase has begun', 'event_started', 'Calendar', 'primary'),
-            ($1, $2, 'Judge Assigned', 'Mike Judge added to judging panel', 'judge_assigned', 'UsersRound', 'success'),
-            ($1, $2, 'Team Activated', 'Code Warriors is now presenting to judges', 'team_activated', 'Users', 'primary')
-          `, [hackathonId, adminId]);
-        }
-      }
+      // Activity log
+      await client.query(`
+        INSERT INTO activity_log (event_id, user_id, title, description, activity_type, icon_name, tone) VALUES
+        ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Event Created', 'Spring 2026 Aggies Invent was created', 'event_created', 'Calendar', 'primary'),
+        ('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Judge Profiles Added', '4 judge profiles created for the event', 'judge_added', 'UserPlus', 'success')
+      `);
     });
 
     console.log('✅ Test data seeded successfully');
 
     return successResponse({
-      message: 'Test data seeded successfully',
+      message: 'Test data seeded successfully with judge profile architecture',
       summary: {
-        users: 7,
+        users: 3,
         sponsors: 1,
-        events: 2,
-        rubric_criteria: 4,
+        events: 1,
+        judge_profiles: 4,
         teams: 3,
-        team_members: 4,
-        judges: 1,
-        judge_sessions: 1,
+        team_members: 5,
+        rubric_criteria: 4,
         score_submissions: 1,
         scores: 4,
         judge_comments: 1,
-        activity_log: 3
+        judge_sessions: 2,
+        activity_log: 2
       }
     });
   } catch (error: any) {

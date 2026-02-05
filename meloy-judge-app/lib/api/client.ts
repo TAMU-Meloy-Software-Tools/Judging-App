@@ -90,6 +90,16 @@ export async function put<T>(endpoint: string, data?: any): Promise<T> {
 }
 
 /**
+ * Helper for PATCH requests
+ */
+export async function patch<T>(endpoint: string, data?: any): Promise<T> {
+    return apiCall<T>(endpoint, {
+        method: 'PATCH',
+        body: data ? JSON.stringify(data) : undefined,
+    });
+}
+
+/**
  * Helper for DELETE requests
  */
 export async function del<T>(endpoint: string): Promise<T> {

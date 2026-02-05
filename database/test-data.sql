@@ -1,118 +1,294 @@
--- Test Data for Judging Portal
--- Minimal dataset for testing API endpoints
+-- ============================================================================
+-- TEST DATA FOR MELOY JUDGING APP
+-- Matches schema.sql - Uses judge profiles (event_judges) for scoring
+-- ============================================================================
 
--- Insert test users
-INSERT INTO users (netid, email, first_name, last_name, role) VALUES
-('admin001', 'admin@tamu.edu', 'John', 'Admin', 'admin'),
-('mod001', 'moderator@tamu.edu', 'Jane', 'Moderator', 'moderator'),
-('judge001', 'judge1@tamu.edu', 'Mike', 'Judge', 'judge'),
-('judge002', 'judge2@tamu.edu', 'Sarah', 'Smith', 'judge'),
-('part001', 'participant1@tamu.edu', 'Bob', 'Builder', 'participant'),
-('part002', 'participant2@tamu.edu', 'Alice', 'Developer', 'participant'),
-('part003', 'participant3@tamu.edu', 'Charlie', 'Coder', 'participant');
+-- Clear existing data (in reverse dependency order)
+TRUNCATE TABLE scores CASCADE;
+TRUNCATE TABLE judge_comments CASCADE;
+TRUNCATE TABLE score_submissions CASCADE;
+TRUNCATE TABLE judge_sessions CASCADE;
+TRUNCATE TABLE team_members CASCADE;
+TRUNCATE TABLE teams CASCADE;
+TRUNCATE TABLE event_judges CASCADE;
+TRUNCATE TABLE sponsors CASCADE;
+TRUNCATE TABLE events CASCADE;
+TRUNCATE TABLE activity_log CASCADE;
+TRUNCATE TABLE users CASCADE;
 
--- Insert sponsor
-INSERT INTO sponsors (name, logo_url, website_url, tier) VALUES
-('TAMU Engineering', 'https://example.com/tamu-logo.png', 'https://engineering.tamu.edu', 'platinum');
+-- ============================================================================
+-- USERS
+-- One admin, one moderator, and ONE shared judge account per event
+-- ============================================================================
 
--- Insert test events
-INSERT INTO events (name, description, event_type, status, location, start_date, end_date, registration_deadline, max_team_size, min_team_size, max_teams, sponsor_id) VALUES
+INSERT INTO users (id, email, password_hash, name, role, is_active) VALUES
+-- Admin account
+('00000000-0000-0000-0000-000000000001', 'admin@tamu.edu', '$2b$10$placeholder', 'Admin User', 'admin', true),
+-- Moderator account  
+('00000000-0000-0000-0000-000000000002', 'moderator@tamu.edu', '$2b$10$placeholder', 'Event Moderator', 'moderator', true),
+-- Shared judge account for Spring Hackathon (all judge profiles use this login)
+('00000000-0000-0000-0000-000000000003', 'judges-hackathon@tamu.edu', '$2b$10$placeholder', 'Hackathon Judges', 'judge', true),
+-- Shared judge account for Design Challenge
+('00000000-0000-0000-0000-000000000004', 'judges-design@tamu.edu', '$2b$10$placeholder', 'Design Challenge Judges', 'judge', true);
+
+-- ============================================================================
+-- SPONSORS
+-- ============================================================================
+
+INSERT INTO sponsors (id, name, logo_url, primary_color, secondary_color, text_color) VALUES
+('00000000-0000-0000-0000-000000000010', 'ExxonMobil', '/ExxonLogo.png', '#b91c1c', '#7f1d1d', '#FFFFFF'),
+('00000000-0000-0000-0000-000000000011', 'Texas A&M Engineering', '/TAMUlogo.png', '#500000', '#3d0000', '#FFFFFF');
+
+-- ============================================================================
+-- EVENTS
+-- ============================================================================
+
+INSERT INTO events (id, name, event_type, duration, start_date, end_date, location, description, status, judging_phase, sponsor_id, created_by) VALUES
 (
-  'Spring 2026 Hackathon',
-  'Annual spring coding competition focusing on web development and AI',
-  'hackathon',
-  'active',
-  'Zachry Engineering Center',
+  '00000000-0000-0000-0000-000000000100',
+  'Spring 2026 Aggies Invent',
+  'aggies-invent',
+  '48 hours',
   '2026-03-15 09:00:00',
-  '2026-03-15 18:00:00',
-  '2026-03-10 23:59:59',
-  4,
-  2,
-  20,
-  (SELECT id FROM sponsors WHERE name = 'TAMU Engineering')
+  '2026-03-17 17:00:00',
+  'Zachry Engineering Center',
+  'Annual spring innovation competition focusing on real-world engineering challenges',
+  'active',
+  'in-progress',
+  '00000000-0000-0000-0000-000000000010',
+  '00000000-0000-0000-0000-000000000001'
 ),
 (
-  'Summer Design Challenge',
-  'UI/UX design competition for mobile applications',
-  'design_competition',
-  'upcoming',
-  'Memorial Student Center',
+  '00000000-0000-0000-0000-000000000101',
+  'Problems Worth Solving 2026',
+  'problems-worth-solving',
+  '24 hours',
   '2026-06-20 10:00:00',
-  '2026-06-20 17:00:00',
-  '2026-06-15 23:59:59',
-  3,
-  1,
-  15,
-  NULL
+  '2026-06-21 10:00:00',
+  'Memorial Student Center',
+  'Individual student competition for solving community problems',
+  'upcoming',
+  'not-started',
+  '00000000-0000-0000-0000-000000000011',
+  '00000000-0000-0000-0000-000000000001'
 );
 
--- Get event IDs for reference
+-- ============================================================================
+-- JUDGE PROFILES (event_judges)
+-- Multiple profiles per event, all sharing one login account
+-- ============================================================================
+
+-- Judge profiles for Spring Hackathon (all use judges-hackathon@tamu.edu login)
+INSERT INTO event_judges (id, event_id, user_id, name) VALUES
+('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000003', 'Dr. Sarah Chen'),
+('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000003', 'Prof. Michael Roberts'),
+('00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000003', 'Dr. Emily Watson'),
+('00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000003', 'Mr. James Miller');
+
+-- Judge profiles for Design Challenge (all use judges-design@tamu.edu login)
+INSERT INTO event_judges (id, event_id, user_id, name) VALUES
+('00000000-0000-0000-0000-000000000211', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000004', 'Prof. Amanda Lee'),
+('00000000-0000-0000-0000-000000000212', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000004', 'Dr. Robert Kim'),
+('00000000-0000-0000-0000-000000000213', '00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000004', 'Ms. Jennifer Park');
+
+-- ============================================================================
+-- TEAMS
+-- ============================================================================
+
+INSERT INTO teams (id, event_id, name, project_title, description, presentation_order, status) VALUES
+-- Teams for Spring Hackathon
+('00000000-0000-0000-0000-000000000301', '00000000-0000-0000-0000-000000000100', 'Code Warriors', 'AI Task Manager', 'Building an AI-powered task manager for students', 1, 'completed'),
+('00000000-0000-0000-0000-000000000302', '00000000-0000-0000-0000-000000000100', 'Debug Squad', 'CollabCode', 'Creating a collaborative coding platform', 2, 'completed'),
+('00000000-0000-0000-0000-000000000303', '00000000-0000-0000-0000-000000000100', 'Innovation Hub', 'SmartCampus', 'IoT solution for campus resource management', 3, 'active'),
+('00000000-0000-0000-0000-000000000304', '00000000-0000-0000-0000-000000000100', 'Tech Pioneers', 'EcoTrack', 'Sustainability tracking mobile app', 4, 'waiting'),
+('00000000-0000-0000-0000-000000000305', '00000000-0000-0000-0000-000000000100', 'Data Miners', 'HealthPredict', 'Predictive health analytics platform', 5, 'waiting'),
+-- Teams for Design Challenge
+('00000000-0000-0000-0000-000000000311', '00000000-0000-0000-0000-000000000101', 'Design Wizards', 'AccessUI', 'Accessible UI design toolkit', 1, 'waiting'),
+('00000000-0000-0000-0000-000000000312', '00000000-0000-0000-0000-000000000101', 'UX Masters', 'MobileFirst', 'Mobile-first design system', 2, 'waiting');
+
+-- ============================================================================
+-- TEAM MEMBERS
+-- ============================================================================
+
+INSERT INTO team_members (team_id, name, email) VALUES
+-- Code Warriors
+('00000000-0000-0000-0000-000000000301', 'Alice Johnson', 'alice@tamu.edu'),
+('00000000-0000-0000-0000-000000000301', 'Bob Smith', 'bob@tamu.edu'),
+('00000000-0000-0000-0000-000000000301', 'Carol Davis', 'carol@tamu.edu'),
+-- Debug Squad
+('00000000-0000-0000-0000-000000000302', 'David Lee', 'david@tamu.edu'),
+('00000000-0000-0000-0000-000000000302', 'Eva Martinez', 'eva@tamu.edu'),
+-- Innovation Hub
+('00000000-0000-0000-0000-000000000303', 'Frank Wilson', 'frank@tamu.edu'),
+('00000000-0000-0000-0000-000000000303', 'Grace Kim', 'grace@tamu.edu'),
+('00000000-0000-0000-0000-000000000303', 'Henry Chen', 'henry@tamu.edu'),
+-- Tech Pioneers
+('00000000-0000-0000-0000-000000000304', 'Ivy Brown', 'ivy@tamu.edu'),
+('00000000-0000-0000-0000-000000000304', 'Jack Taylor', 'jack@tamu.edu'),
+-- Data Miners
+('00000000-0000-0000-0000-000000000305', 'Karen White', 'karen@tamu.edu'),
+('00000000-0000-0000-0000-000000000305', 'Leo Garcia', 'leo@tamu.edu');
+
+-- ============================================================================
+-- SCORE SUBMISSIONS & SCORES
+-- Sample completed scores for testing the leaderboard
+-- ============================================================================
+
+-- Get rubric criteria IDs (these are seeded in schema.sql)
 DO $$ 
 DECLARE
-  hackathon_id UUID;
-  design_id UUID;
-  admin_id UUID;
-  mod_id UUID;
-  part1_id UUID;
-  part2_id UUID;
-  part3_id UUID;
-  team1_id UUID;
-  team2_id UUID;
+  comm_id UUID;
+  fund_id UUID;
+  pres_id UUID;
+  cohe_id UUID;
+  sub1_id UUID;
+  sub2_id UUID;
+  sub3_id UUID;
+  sub4_id UUID;
 BEGIN
-  -- Get IDs
-  SELECT id INTO hackathon_id FROM events WHERE name = 'Spring 2026 Hackathon';
-  SELECT id INTO design_id FROM events WHERE name = 'Summer Design Challenge';
-  SELECT id INTO admin_id FROM users WHERE netid = 'admin001';
-  SELECT id INTO mod_id FROM users WHERE netid = 'mod001';
-  SELECT id INTO part1_id FROM users WHERE netid = 'part001';
-  SELECT id INTO part2_id FROM users WHERE netid = 'part002';
-  SELECT id INTO part3_id FROM users WHERE netid = 'part003';
+  -- Get rubric criteria IDs by display_order
+  SELECT id INTO comm_id FROM rubric_criteria WHERE display_order = 1;
+  SELECT id INTO fund_id FROM rubric_criteria WHERE display_order = 2;
+  SELECT id INTO pres_id FROM rubric_criteria WHERE display_order = 3;
+  SELECT id INTO cohe_id FROM rubric_criteria WHERE display_order = 4;
 
-  -- Insert teams for hackathon
-  INSERT INTO teams (event_id, name, description, status) VALUES
-  (hackathon_id, 'Code Warriors', 'Building an AI-powered task manager', 'approved'),
-  (hackathon_id, 'Debug Squad', 'Creating a collaborative coding platform', 'approved'),
-  (hackathon_id, 'Pending Team', 'Working on IoT solution', 'pending')
-  RETURNING id INTO team1_id;
+  -- ============================================================================
+  -- TEAM 1: Code Warriors - Fully scored by all 4 judges
+  -- ============================================================================
+  
+  -- Dr. Sarah Chen scores Code Warriors
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000401', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000301', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour 45 minutes', 900)
+  RETURNING id INTO sub1_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', comm_id, 22, 'Excellent problem articulation'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', fund_id, 24, 'Very viable business model'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', pres_id, 21, 'Good demo, minor technical issues'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', cohe_id, 23, 'Strong team dynamics');
+  
+  INSERT INTO judge_comments (submission_id, judge_id, team_id, comments)
+  VALUES (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000301', 'Outstanding project with real market potential. Recommend for top prize consideration.');
 
-  -- Get team IDs
-  SELECT id INTO team1_id FROM teams WHERE name = 'Code Warriors';
-  SELECT id INTO team2_id FROM teams WHERE name = 'Debug Squad';
+  -- Prof. Michael Roberts scores Code Warriors
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000402', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000301', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 hour 30 minutes', 1800)
+  RETURNING id INTO sub2_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000301', comm_id, 20, 'Clear messaging'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000301', fund_id, 22, 'Good potential'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000301', pres_id, 23, 'Engaging presentation'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000301', cohe_id, 21, 'Worked well together');
 
-  -- Add team members
-  INSERT INTO team_members (team_id, user_id, role) VALUES
-  (team1_id, part1_id, 'leader'),
-  (team1_id, part2_id, 'member'),
-  (team2_id, part3_id, 'leader');
+  -- Dr. Emily Watson scores Code Warriors
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000403', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000301', NOW() - INTERVAL '1 hour 45 minutes', NOW() - INTERVAL '1 hour 20 minutes', 1500)
+  RETURNING id INTO sub3_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000301', comm_id, 23, 'Very persuasive'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000301', fund_id, 21, 'Needs more market research'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000301', pres_id, 24, 'Excellent demo'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000301', cohe_id, 22, 'Good collaboration');
 
-  -- Add judges to event
-  INSERT INTO event_judges (event_id, user_id, assigned_by) VALUES
-  (hackathon_id, (SELECT id FROM users WHERE netid = 'judge001'), admin_id),
-  (hackathon_id, (SELECT id FROM users WHERE netid = 'judge002'), admin_id);
+  -- Mr. James Miller scores Code Warriors
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000404', '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000301', NOW() - INTERVAL '1 hour 30 minutes', NOW() - INTERVAL '1 hour', 1800)
+  RETURNING id INTO sub4_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub4_id, '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000301', comm_id, 21, 'Good story'),
+  (sub4_id, '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000301', fund_id, 23, 'Would invest'),
+  (sub4_id, '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000301', pres_id, 22, 'Professional delivery'),
+  (sub4_id, '00000000-0000-0000-0000-000000000204', '00000000-0000-0000-0000-000000000301', cohe_id, 24, 'Exceptional teamwork');
 
-  -- Add some submissions
-  INSERT INTO submissions (team_id, judge_id, status, submitted_at) VALUES
-  (team1_id, (SELECT id FROM users WHERE netid = 'judge001'), 'completed', NOW() - INTERVAL '1 hour'),
-  (team2_id, (SELECT id FROM users WHERE netid = 'judge001'), 'in_progress', NOW() - INTERVAL '30 minutes');
+  -- ============================================================================
+  -- TEAM 2: Debug Squad - Scored by 3 judges (one pending)
+  -- ============================================================================
+  
+  -- Dr. Sarah Chen scores Debug Squad
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000411', '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000302', NOW() - INTERVAL '1 hour', NOW() - INTERVAL '45 minutes', 900)
+  RETURNING id INTO sub1_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000302', comm_id, 19, 'Good but could be clearer'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000302', fund_id, 20, 'Competitive market'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000302', pres_id, 21, 'Nice visuals'),
+  (sub1_id, '00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000302', cohe_id, 20, 'Good teamwork');
 
-  -- Add scores for completed submission
-  INSERT INTO scores (submission_id, category, score, max_score) VALUES
-  (
-    (SELECT id FROM submissions WHERE team_id = team1_id AND judge_id = (SELECT id FROM users WHERE netid = 'judge001')),
-    'technical_implementation',
-    85,
-    100
-  ),
-  (
-    (SELECT id FROM submissions WHERE team_id = team1_id AND judge_id = (SELECT id FROM users WHERE netid = 'judge001')),
-    'innovation',
-    90,
-    100
-  ),
-  (
-    (SELECT id FROM submissions WHERE team_id = team1_id AND judge_id = (SELECT id FROM users WHERE netid = 'judge001')),
-    'presentation',
-    78,
-    100
-  );
+  -- Prof. Michael Roberts scores Debug Squad
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000412', '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000302', NOW() - INTERVAL '50 minutes', NOW() - INTERVAL '30 minutes', 1200)
+  RETURNING id INTO sub2_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000302', comm_id, 18, 'Needs work on messaging'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000302', fund_id, 21, 'Interesting approach'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000302', pres_id, 19, 'Some technical difficulties'),
+  (sub2_id, '00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000302', cohe_id, 22, 'Strong collaboration');
+
+  -- Dr. Emily Watson scores Debug Squad
+  INSERT INTO score_submissions (id, judge_id, event_id, team_id, started_at, submitted_at, time_spent_seconds)
+  VALUES ('00000000-0000-0000-0000-000000000413', '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000302', NOW() - INTERVAL '40 minutes', NOW() - INTERVAL '20 minutes', 1200)
+  RETURNING id INTO sub3_id;
+  
+  INSERT INTO scores (submission_id, judge_id, team_id, rubric_criteria_id, score, reflection) VALUES
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000302', comm_id, 20, 'Clear problem statement'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000302', fund_id, 19, 'Revenue model unclear'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000302', pres_id, 22, 'Engaging speakers'),
+  (sub3_id, '00000000-0000-0000-0000-000000000203', '00000000-0000-0000-0000-000000000302', cohe_id, 21, 'Good synergy');
+
+  -- Mr. James Miller has NOT scored Debug Squad yet (simulating in-progress judging)
+
 END $$;
+
+-- ============================================================================
+-- JUDGE SESSIONS (for online status)
+-- ============================================================================
+
+INSERT INTO judge_sessions (event_id, judge_id, logged_in_at, last_activity, logged_out_at) VALUES
+-- Active sessions for Spring Hackathon
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000201', NOW() - INTERVAL '3 hours', NOW() - INTERVAL '2 minutes', NULL),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000202', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '1 minute', NULL),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000203', NOW() - INTERVAL '2.5 hours', NOW() - INTERVAL '10 minutes', NULL),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000204', NOW() - INTERVAL '1 hour', NOW() - INTERVAL '30 minutes', NULL);
+
+-- ============================================================================
+-- ACTIVITY LOG
+-- ============================================================================
+
+INSERT INTO activity_log (event_id, user_id, title, description, activity_type, icon_name, tone) VALUES
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Event Created', 'Spring 2026 Aggies Invent was created', 'event_created', 'Calendar', 'primary'),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000001', 'Judge Profiles Added', '4 judge profiles created for the event', 'judge_added', 'UserPlus', 'success'),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000002', 'Judging Started', 'Judging phase set to in-progress', 'phase_changed', 'Play', 'primary'),
+('00000000-0000-0000-0000-000000000100', '00000000-0000-0000-0000-000000000003', 'Scores Submitted', 'Dr. Sarah Chen submitted scores for Code Warriors', 'scoring_completed', 'CheckCircle', 'success');
+
+-- ============================================================================
+-- SUMMARY
+-- ============================================================================
+-- 
+-- Users:
+--   - 1 Admin (admin@tamu.edu)
+--   - 1 Moderator (moderator@tamu.edu)
+--   - 1 Shared Judge Account for Hackathon (judges-hackathon@tamu.edu)
+--   - 1 Shared Judge Account for Design Challenge (judges-design@tamu.edu)
+--
+-- Events:
+--   - Spring 2026 Aggies Invent (active, in-progress judging)
+--   - Problems Worth Solving 2026 (upcoming, not-started)
+--
+-- Judge Profiles:
+--   - 4 profiles for Hackathon: Dr. Sarah Chen, Prof. Michael Roberts, Dr. Emily Watson, Mr. James Miller
+--   - 3 profiles for Design Challenge: Prof. Amanda Lee, Dr. Robert Kim, Ms. Jennifer Park
+--
+-- Teams:
+--   - 5 teams for Hackathon (various statuses)
+--   - 2 teams for Design Challenge (waiting)
+--
+-- Scores:
+--   - Code Warriors: Fully scored by all 4 judges (total ~356/400)
+--   - Debug Squad: Scored by 3/4 judges (Mr. James Miller pending)
+--   - Other teams: Not yet scored
+--

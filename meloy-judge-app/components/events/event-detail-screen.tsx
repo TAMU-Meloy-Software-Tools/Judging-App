@@ -1,12 +1,14 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Image from "next/image"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Screen } from "@/app/page"
-import { ArrowLeft, BarChart3, Users, CheckCircle2, Clock, Circle, MapPin, CalendarDays, Activity, Settings, User } from "lucide-react"
+import { ArrowLeft, BarChart3, Users, CheckCircle2, Clock, Circle, MapPin, CalendarDays, Activity, Settings, User, Loader2 } from "lucide-react"
+import { getEvent, getEventTeams } from "@/lib/api"
+import type { Event, Team } from "@/lib/types/api"
 
 interface EventDetailScreenProps {
   eventId: string
@@ -19,130 +21,103 @@ interface EventDetailScreenProps {
   judgeName: string | null
 }
 
-// Mock data for Aggies Invent (teams)
-const mockTeamsAggiesInvent = [
-  {
-    id: "1",
-    name: "Team Alpha",
-    projectTitle: "Smart Campus Navigation System",
-    members: ["John Doe", "Jane Smith", "Bob Johnson"],
-    status: "not-scored",
-  },
-  {
-    id: "2",
-    name: "Team Beta",
-    projectTitle: "Sustainable Energy Monitor",
-    members: ["Alice Williams", "Charlie Brown", "Diana Prince"],
-    status: "scored",
-    score: 87,
-  },
-  {
-    id: "3",
-    name: "Team Gamma",
-    projectTitle: "AI-Powered Study Assistant",
-    members: ["Eve Davis", "Frank Miller", "Grace Lee"],
-    status: "in-progress",
-  },
-  {
-    id: "4",
-    name: "Team Delta",
-    projectTitle: "Campus Safety Alert System",
-    members: ["Henry Wilson", "Ivy Chen", "Jack Taylor"],
-    status: "not-scored",
-  },
-  {
-    id: "5",
-    name: "Team Epsilon",
-    projectTitle: "Food Waste Reduction Platform",
-    members: ["Kate Anderson", "Leo Martinez", "Maya Patel"],
-    status: "scored",
-    score: 92,
-  },
-]
-
-// Mock data for PWS (individual students)
-const mockStudentsPWS = [
-  {
-    id: "1",
-    name: "Sarah Johnson",
-    projectTitle: "Community Water Purification Initiative",
-    members: ["Sarah Johnson"], // Single member for consistency
-    status: "not-scored",
-  },
-  {
-    id: "2",
-    name: "Marcus Chen",
-    projectTitle: "Affordable Healthcare Access Platform",
-    members: ["Marcus Chen"],
-    status: "scored",
-    score: 91,
-  },
-  {
-    id: "3",
-    name: "Emily Rodriguez",
-    projectTitle: "Rural Education Technology Bridge",
-    members: ["Emily Rodriguez"],
-    status: "in-progress",
-  },
-  {
-    id: "4",
-    name: "David Thompson",
-    projectTitle: "Sustainable Agriculture Solutions",
-    members: ["David Thompson"],
-    status: "not-scored",
-  },
-  {
-    id: "5",
-    name: "Jessica Martinez",
-    projectTitle: "Mental Health Support Network",
-    members: ["Jessica Martinez"],
-    status: "scored",
-    score: 88,
-  },
-]
-
 export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, onManageEvent, onOpenModerator, isAdmin, judgeName }: EventDetailScreenProps) {
-  // small display mapping for event & sponsor logos (replace with real data retrieval later)
-  // show white version of event logos via CSS filter for high contrast in header
-  const eventLogoSrc = eventId === "3" ? "/pws.png" : "/aggiesinvent.png"
-  const isPWSEvent = eventId === "3" // PWS detection - event ID 3 is PWS, 1 and 2 are Aggies Invent
+  const [event, setEvent] = useState<Event | null>(null)
+  const [teams, setTeams] = useState<Team[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        setError(null)
+        const [eventData, teamsData] = await Promise.all([
+          getEvent(eventId),
+          getEventTeams(eventId, true)  // activeOnly=true for judges
+        ])
+        setEvent(eventData.event)
+        setTeams(teamsData.teams)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load event data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [eventId])
+
+  // Determine event type and labels from RDS data
+  const isPWSEvent = event?.event_type?.includes("problems-worth-solving") ?? false
   const participantLabel = isPWSEvent ? "Student" : "Team"
   const participantsLabel = isPWSEvent ? "Students" : "Teams"
-  
-  // Use appropriate mock data based on event type
-  const mockTeams = isPWSEvent ? mockStudentsPWS : mockTeamsAggiesInvent
-  
-  const scoredCount = mockTeams.filter((t) => t.status === "scored").length
-  const totalCount = mockTeams.length
-  const inProgressCount = mockTeams.filter((t) => t.status === "in-progress").length
-  const notScoredCount = totalCount - scoredCount - inProgressCount
-  const completionPercent = Math.round((scoredCount / totalCount) * 100)
-  // Sponsor data based on event type
-  const sponsor = isPWSEvent
-    ? { 
-        name: "Meloy Program", 
-        logo: "/TAMUlogo.png",
-        primaryColor: "#500000",
-        secondaryColor: "#3d0000"
-      }
-    : { 
-        name: "ExxonMobil", 
-        logo: "/ExxonLogo.png",
-        primaryColor: "#b91c1c",
-        secondaryColor: "#7f1d1d"
-      }
 
-  const statusCopy: Record<typeof mockTeams[number]["status"], { label: string; tone: string }> = {
-    scored: { label: "Scored", tone: "text-emerald-600" },
-    "in-progress": { label: "In Progress", tone: "text-amber-500" },
-    "not-scored": { label: "Not Scored", tone: "text-slate-500" },
+  // Calculate team statistics from RDS data
+  const totalCount = teams.length
+  const scoredCount = teams.filter(t => t.has_current_user_scored).length
+  const inProgressCount = 0 // Could track partially completed in future
+  const notScoredCount = totalCount - scoredCount - inProgressCount
+
+  // Get event logo based on event type
+  const eventLogoSrc = isPWSEvent ? "/pws.png" : "/aggiesinvent.png"
+
+  // Sponsor data from RDS or fallback
+  const sponsor = event?.sponsor_id && event.sponsor ? {
+    name: event.sponsor.name ?? "Sponsor",
+    logo: event.sponsor.logo_url ?? (isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png"),
+    primaryColor: event.sponsor.primary_color ?? (isPWSEvent ? "#500000" : "#b91c1c"),
+    secondaryColor: event.sponsor.secondary_color ?? (isPWSEvent ? "#3d0000" : "#7f1d1d")
+  } : {
+    name: isPWSEvent ? "Meloy Program" : "ExxonMobil",
+    logo: isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png",
+    primaryColor: isPWSEvent ? "#500000" : "#b91c1c",
+    secondaryColor: isPWSEvent ? "#3d0000" : "#7f1d1d"
+  }
+
+  // Format date range helper
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' }
+
+    if (start.toDateString() === end.toDateString()) {
+      return start.toLocaleDateString('en-US', options)
+    }
+
+    const startMonth = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const endFormatted = end.toLocaleDateString('en-US', options)
+    return `${startMonth} – ${endFormatted}`
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg text-slate-600">Loading event details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !event) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <p className="text-lg text-red-600 mb-4">{error || 'Event not found'}</p>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
-    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
-  <div className="relative mx-auto max-w-7xl px-6 py-4 lg:px-8">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        <div className="relative mx-auto max-w-7xl px-6 py-4 lg:px-8">
           {/* Main Header Row */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
             <div className="flex items-center gap-4 lg:gap-5">
@@ -159,7 +134,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 </div>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">Event spotlight</p>
-                  <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">Aggies Invent Spring 2025</h1>
+                  <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">{event.name}</h1>
                 </div>
               </div>
             </div>
@@ -175,7 +150,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                   <span className="text-xs text-white/70">Admin</span>
                 </div>
               </div>
-              
+
               <Button
                 onClick={() => onNavigate("leaderboard")}
                 className="h-11 rounded-full bg-white px-5 lg:px-6 text-base font-semibold text-primary shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-white/95"
@@ -206,11 +181,11 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
         </div>
       </header>
 
-  <main className="relative mx-auto max-w-7xl px-6 py-5 lg:py-6">
+      <main className="relative mx-auto max-w-7xl px-6 py-5 lg:py-6">
         {/* Unified Event Info Banner - sponsor and event details in one cohesive card */}
-  <div className="relative mb-6 overflow-hidden rounded-3xl border-2 border-red-950 shadow-xl">
+        <div className="relative mb-6 overflow-hidden rounded-3xl border-2 border-red-950 shadow-xl">
           {/* Inner container with sponsor gradient - smaller radius to fit inside border */}
-          <div 
+          <div
             className="relative rounded-[22px] py-4 px-5 lg:py-5 lg:px-6"
             style={{
               background: `linear-gradient(to bottom, ${sponsor.primaryColor}, ${sponsor.secondaryColor})`
@@ -218,16 +193,16 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
           >
             {/* Very subtle texture overlay */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
-            
+
             <div className="relative flex items-center gap-6 lg:gap-8">
               {/* Sponsor block with glass container showing sponsor color */}
               <div className="group relative flex items-center gap-5 lg:gap-6 cursor-pointer transition-transform hover:scale-[1.02]">
                 {/* Dynamic glass container - adapts to logo aspect ratio */}
-                <div 
+                <div
                   className="relative flex shrink-0 items-center justify-center rounded-2xl py-3 px-6 lg:py-4 lg:px-8 shadow-xl backdrop-blur-xl transition-all group-hover:shadow-2xl bg-white/70 border-2 border-white/80 min-h-20 lg:min-h-24"
                 >
                   {/* Inner glow on hover */}
-                  <div 
+                  <div
                     className="absolute inset-0 rounded-2xl opacity-0 transition-opacity group-hover:opacity-100"
                     style={{ backgroundColor: `${sponsor.primaryColor}10` }}
                   />
@@ -246,7 +221,7 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
               </div>
 
               {/* Event details card with status badge - enhanced glass aesthetic */}
-                <div className="ml-auto flex items-center gap-3">
+              <div className="ml-auto flex items-center gap-3">
                 {/* Event Status Badge - enhanced glass background */}
                 <div className="flex items-center gap-2 rounded-full border-2 border-white/70 bg-white/70 backdrop-blur-xl px-4 py-2 shadow-xl">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -256,25 +231,25 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
                 {/* Event details - enhanced glass background */}
                 <div className="flex items-center rounded-3xl border-2 border-white/70 bg-white/70 backdrop-blur-xl px-4 py-2 shadow-xl">
                   <div className="flex items-center gap-3">
-                      <Image src={eventLogoSrc} alt="Event logo" width={64} height={64} className="w-16 h-16 lg:w-20 lg:h-20 object-contain" />
+                    <Image src={eventLogoSrc} alt="Event logo" width={64} height={64} className="w-16 h-16 lg:w-20 lg:h-20 object-contain" />
 
                     <div className="flex items-center gap-5 lg:gap-6">
                       <div className="flex items-center gap-2 lg:gap-3">
                         <CalendarDays className="h-5 w-5 text-slate-700" />
                         <div>
                           <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Dates</p>
-                          <p className="text-sm lg:text-base font-semibold text-slate-900">Mar 15–17, 2025</p>
+                          <p className="text-sm lg:text-base font-semibold text-slate-900">{formatDateRange(event.start_date, event.end_date)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 lg:gap-3">
                         <MapPin className="h-5 w-5 text-slate-700" />
                         <div>
                           <p className="text-xs uppercase tracking-[0.12em] text-slate-600">Venue</p>
-                          <p className="text-sm lg:text-base font-semibold text-slate-900">Zachry Engineering Center</p>
+                          <p className="text-sm lg:text-base font-semibold text-slate-900">{event.location}</p>
                         </div>
                       </div>
                     </div>
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -282,10 +257,10 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
         </div>
 
         {/* Metric cards with visual connection to event info banner */}
-  <section className="relative mb-4 grid grid-cols-3 gap-4">
+        <section className="relative mb-4 grid grid-cols-3 gap-4">
           {/* Subtle connecting gradient fade from banner to metrics */}
           <div className="absolute -top-4 left-0 right-0 h-6 bg-linear-to-b from-slate-50/30 to-transparent pointer-events-none" />
-          
+
           <div className="group relative overflow-hidden rounded-2xl border-2 border-emerald-200 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-300">
             <div className="absolute inset-0 bg-linear-to-br from-emerald-200/60 via-emerald-100/40 to-transparent" />
             <div className="relative flex items-center gap-3">
@@ -337,60 +312,64 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
           </div>
 
           <div className="grid gap-6">
-            {mockTeams.map((team) => (
-              <Card
-                key={team.id}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
-                onClick={() => onSelectTeam(team.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault()
-                    onSelectTeam(team.id)
-                  }
-                }}
-              >
-                <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70" />
-                <CardHeader className="relative flex flex-col gap-3 p-6 pb-4">
-                  <div>
-                    <CardTitle className="text-2xl font-semibold text-slate-900 transition-colors group-hover:text-primary">
-                      {team.name}
-                    </CardTitle>
-                    <CardDescription className="mt-2 text-base text-slate-600">{team.projectTitle}</CardDescription>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge
-                      className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-semibold text-slate-600 shadow-sm"
-                    >
-                      {team.status === "scored" ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      ) : team.status === "in-progress" ? (
-                        <Clock className="h-4 w-4 text-amber-500" />
-                      ) : (
-                        <Circle className="h-4 w-4 text-slate-400" />
-                      )}
-                      <span className={statusCopy[team.status].tone}>{statusCopy[team.status].label}</span>
-                    </Badge>
-                    {team.status === "scored" && typeof team.score === "number" ? (
-                      <Badge className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
-                        Score {team.score}
-                      </Badge>
-                    ) : null}
-                  </div>
-                </CardHeader>
-                {!isPWSEvent && (
-                  <CardContent className="px-6 pb-6">
-                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/70 px-4 py-3 text-sm text-slate-600">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                        <Users className="h-5 w-5 text-primary" />
-                      </span>
-                      <span className="font-medium text-slate-700">{team.members.join(", ")}</span>
+            {teams.length > 0 ? teams.map((team) => {
+              const isScored = team.has_current_user_scored ?? false;
+              return (
+                <Card
+                  key={team.id}
+                  className={`group relative overflow-hidden rounded-3xl border shadow-md transition-all ${isScored
+                    ? 'border-emerald-200 bg-emerald-50/50 opacity-75 cursor-default'
+                    : 'border-slate-200/70 bg-white/90 hover:-translate-y-1 hover:shadow-xl cursor-pointer'
+                    }`}
+                  onClick={() => !isScored && onSelectTeam(team.id)}
+                  role="button"
+                  tabIndex={isScored ? -1 : 0}
+                  onKeyDown={(event) => {
+                    if (!isScored && (event.key === "Enter" || event.key === " ")) {
+                      event.preventDefault()
+                      onSelectTeam(team.id)
+                    }
+                  }}
+                >
+                  <div className={`absolute inset-x-0 top-0 h-1 ${isScored
+                    ? 'bg-emerald-500'
+                    : 'bg-linear-to-r from-primary via-rose-400 to-orange-300 opacity-70'
+                    }`} />
+                  <CardHeader className="relative flex flex-col gap-3 p-6 pb-4">
+                    <div>
+                      <CardTitle className={`text-2xl font-semibold transition-colors ${isScored ? 'text-emerald-700' : 'text-slate-900 group-hover:text-primary'
+                        }`}>
+                        {team.name}
+                      </CardTitle>
+                      <CardDescription className="mt-2 text-base text-slate-600">{team.description || 'No description'}</CardDescription>
                     </div>
-                  </CardContent>
-                )}
+                    <div className="flex flex-wrap items-center gap-3">
+                      {isScored ? (
+                        <Badge className="flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm">
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span>Scores Submitted</span>
+                        </Badge>
+                      ) : (
+                        <Badge className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-sm font-semibold text-slate-600 shadow-sm">
+                          <Circle className="h-4 w-4 text-slate-400" />
+                          <span className="text-slate-600">{team.status || 'Pending'}</span>
+                        </Badge>
+                      )}
+                    </div>
+                  </CardHeader>
+                </Card>
+              );
+            }) : (
+              <Card className="rounded-[28px] border border-slate-200/70 bg-white/95 shadow-lg">
+                <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                  <Clock className="h-16 w-16 text-slate-300" />
+                  <CardTitle className="text-xl font-semibold text-slate-700">No Active {participantsLabel}</CardTitle>
+                  <CardDescription className="text-base text-slate-500 max-w-md">
+                    The moderator will activate {participantsLabel.toLowerCase()} for judging when ready. Check back soon or contact the event moderator.
+                  </CardDescription>
+                </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </div>
       </main>

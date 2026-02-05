@@ -1,8 +1,8 @@
 -- ============================================================================
 -- MELOY JUDGING APP - DATABASE SCHEMA
 -- PostgreSQL Schema for AWS RDS
--- Version: 1.0
--- Last Updated: January 17, 2026
+-- Version: 1.1
+-- Last Updated: February 2, 2026
 -- ============================================================================
 
 -- Enable required extensions
@@ -83,22 +83,47 @@ COMMENT ON COLUMN sponsors.primary_color IS 'Hex color for gradients and banners
 
 -- ============================================================================
 -- TABLE 4: JUDGE SESSIONS
--- Tracks judge login sessions and online status
+-- Tracks judge profile login sessions and online status
 -- ============================================================================
 
 CREATE TABLE judge_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_id UUID REFERENCES events(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    judge_id UUID,  -- Will reference event_judges(id) after that table is created
     logged_in_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     logged_out_at TIMESTAMP,
-    UNIQUE(event_id, user_id, logged_in_at)
+    UNIQUE(event_id, judge_id, logged_in_at)
 );
 
-COMMENT ON TABLE judge_sessions IS 'Judge login sessions for tracking online status';
-COMMENT ON COLUMN judge_sessions.last_activity IS 'Updated on each API call; judge is "online" if < 5 min ago';
+COMMENT ON TABLE judge_sessions IS 'Judge profile login sessions for tracking online status';
+COMMENT ON COLUMN judge_sessions.judge_id IS 'References the judge profile (event_judges) - FK added after event_judges table';
+COMMENT ON COLUMN judge_sessions.last_activity IS 'Updated on each API call; judge profile is "online" if < 5 min ago';
 COMMENT ON COLUMN judge_sessions.logged_out_at IS 'NULL = still logged in, NOT NULL = session ended';
+
+-- ============================================================================
+-- TABLE 4.5: EVENT JUDGES (Judge Profiles)
+-- Judge profiles for each event - multiple profiles can share one login account
+-- ============================================================================
+
+CREATE TABLE event_judges (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    event_id UUID REFERENCES events(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,  -- The shared login account for this event
+    name VARCHAR(255) NOT NULL,  -- Judge profile name (e.g., "Dr. Smith", "Prof. Chen")
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(event_id, name)  -- Each judge profile name must be unique within an event
+);
+
+COMMENT ON TABLE event_judges IS 'Judge profiles for events - multiple profiles share one login account per event';
+COMMENT ON COLUMN event_judges.user_id IS 'The shared judge account that all profiles for this event log into';
+COMMENT ON COLUMN event_judges.name IS 'Display name for this judge profile (selected when entering event)';
+COMMENT ON COLUMN event_judges.assigned_at IS 'Timestamp when judge profile was created';
+
+-- Add FK constraint for judge_sessions now that event_judges exists
+ALTER TABLE judge_sessions ADD CONSTRAINT fk_judge_sessions_judge 
+    FOREIGN KEY (judge_id) REFERENCES event_judges(id) ON DELETE CASCADE;
+
 
 -- ============================================================================
 -- TABLE 5: TEAMS
@@ -111,10 +136,13 @@ CREATE TABLE teams (
     name VARCHAR(255) NOT NULL,
     project_title VARCHAR(255),
     description TEXT,
-    presentation_order INTEGER NOT NULL, -- Order set by admin/moderator
+    presentation_order INTEGER, -- Order set by admin/moderator (nullable in actual RDS)
     
     -- Status controlled by moderator
     status VARCHAR(20) DEFAULT 'waiting' CHECK (status IN ('waiting', 'active', 'completed')),
+    
+    -- Project URL
+    project_url TEXT, -- Added to match actual RDS schema
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -169,12 +197,12 @@ COMMENT ON COLUMN rubric_criteria.guiding_question IS 'Placeholder text for judg
 
 -- ============================================================================
 -- TABLE 8: SCORE SUBMISSIONS
--- Tracks judge progress per team (started, completed, time spent)
+-- Tracks judge profile progress per team (started, completed, time spent)
 -- ============================================================================
 
 CREATE TABLE score_submissions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    judge_id UUID REFERENCES event_judges(id) ON DELETE CASCADE,  -- Judge profile, not user account
     event_id UUID REFERENCES events(id) ON DELETE CASCADE,
     team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
     
@@ -184,10 +212,11 @@ CREATE TABLE score_submissions (
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, team_id)
+    UNIQUE(judge_id, team_id)  -- One submission per judge profile per team
 );
 
-COMMENT ON TABLE score_submissions IS 'Judge scoring progress (one per judge per team)';
+COMMENT ON TABLE score_submissions IS 'Judge profile scoring progress (one per judge profile per team)';
+COMMENT ON COLUMN score_submissions.judge_id IS 'References the judge profile (event_judges), not the user account';
 COMMENT ON COLUMN score_submissions.submitted_at IS 'NULL = judge is still scoring, NOT NULL = judge submitted final scores';
 COMMENT ON COLUMN score_submissions.time_spent_seconds IS 'Calculated as (submitted_at - started_at) for analytics';
 
@@ -199,7 +228,7 @@ COMMENT ON COLUMN score_submissions.time_spent_seconds IS 'Calculated as (submit
 CREATE TABLE scores (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     submission_id UUID REFERENCES score_submissions(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    judge_id UUID REFERENCES event_judges(id) ON DELETE CASCADE,  -- Judge profile, not user account
     team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
     rubric_criteria_id UUID REFERENCES rubric_criteria(id) ON DELETE CASCADE,
     
@@ -208,10 +237,11 @@ CREATE TABLE scores (
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, team_id, rubric_criteria_id)
+    UNIQUE(judge_id, team_id, rubric_criteria_id)  -- One score per judge profile per team per criteria
 );
 
-COMMENT ON TABLE scores IS 'Individual scores per judge per team per criteria';
+COMMENT ON TABLE scores IS 'Individual scores per judge profile per team per criteria';
+COMMENT ON COLUMN scores.judge_id IS 'References the judge profile (event_judges), not the user account';
 COMMENT ON COLUMN scores.reflection IS 'Judge notes/feedback for this specific criteria';
 
 -- ============================================================================
@@ -222,17 +252,18 @@ COMMENT ON COLUMN scores.reflection IS 'Judge notes/feedback for this specific c
 CREATE TABLE judge_comments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     submission_id UUID REFERENCES score_submissions(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    judge_id UUID REFERENCES event_judges(id) ON DELETE CASCADE,  -- Judge profile, not user account
     team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
     
     comments TEXT,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, team_id)
+    UNIQUE(judge_id, team_id)  -- One comment per judge profile per team
 );
 
-COMMENT ON TABLE judge_comments IS 'Overall comments from judge about the team (separate from per-criteria reflections)';
+COMMENT ON TABLE judge_comments IS 'Overall comments from judge profile about the team (separate from per-criteria reflections)';
+COMMENT ON COLUMN judge_comments.judge_id IS 'References the judge profile (event_judges), not the user account';
 
 -- ============================================================================
 -- TABLE 11: ACTIVITY LOG
@@ -286,8 +317,8 @@ CREATE INDEX idx_events_judging_phase ON events(judging_phase);
 CREATE INDEX idx_events_created_by ON events(created_by);
 
 -- Judge Sessions
-CREATE INDEX idx_judge_sessions_event_user ON judge_sessions(event_id, user_id);
-CREATE INDEX idx_judge_sessions_active ON judge_sessions(event_id, user_id, last_activity) 
+CREATE INDEX idx_judge_sessions_event_judge ON judge_sessions(event_id, judge_id);
+CREATE INDEX idx_judge_sessions_active ON judge_sessions(event_id, judge_id, last_activity) 
     WHERE logged_out_at IS NULL;
 
 -- Teams
@@ -302,19 +333,19 @@ CREATE INDEX idx_team_members_team ON team_members(team_id);
 CREATE INDEX idx_rubric_criteria_order ON rubric_criteria(display_order);
 
 -- Score Submissions
-CREATE INDEX idx_score_submissions_user_team ON score_submissions(user_id, team_id);
+CREATE INDEX idx_score_submissions_judge_team ON score_submissions(judge_id, team_id);
 CREATE INDEX idx_score_submissions_event ON score_submissions(event_id);
 CREATE INDEX idx_score_submissions_completed ON score_submissions(submitted_at) 
     WHERE submitted_at IS NOT NULL;
 
 -- Scores
 CREATE INDEX idx_scores_submission ON scores(submission_id);
-CREATE INDEX idx_scores_user_team ON scores(user_id, team_id);
+CREATE INDEX idx_scores_judge_team ON scores(judge_id, team_id);
 CREATE INDEX idx_scores_team ON scores(team_id);
 
 -- Judge Comments
 CREATE INDEX idx_judge_comments_submission ON judge_comments(submission_id);
-CREATE INDEX idx_judge_comments_user_team ON judge_comments(user_id, team_id);
+CREATE INDEX idx_judge_comments_judge_team ON judge_comments(judge_id, team_id);
 
 -- Activity Log
 CREATE INDEX idx_activity_log_event ON activity_log(event_id);
@@ -385,25 +416,23 @@ INSERT INTO rubric_criteria (name, short_name, description, max_score, display_o
 -- HELPER VIEWS
 -- ============================================================================
 
--- View: Judge online status for moderator screen
+-- View: Judge profile online status for moderator screen
 CREATE VIEW judge_online_status AS
 SELECT 
-    e.id as event_id,
-    u.id as user_id,
-    u.name as judge_name,
+    ej.event_id,
+    ej.id as judge_id,
+    ej.name as judge_name,
     js.last_activity,
     CASE 
         WHEN js.logged_out_at IS NULL AND js.last_activity > NOW() - INTERVAL '5 minutes' 
         THEN true 
         ELSE false 
     END as is_online
-FROM users u
-JOIN judge_sessions js ON u.id = js.user_id
-JOIN events e ON js.event_id = e.id
-WHERE u.role IN ('judge', 'admin', 'moderator')
-  AND js.logged_out_at IS NULL;
+FROM event_judges ej
+LEFT JOIN judge_sessions js ON ej.id = js.judge_id AND ej.event_id = js.event_id
+WHERE js.logged_out_at IS NULL OR js.id IS NULL;
 
-COMMENT ON VIEW judge_online_status IS 'Real-time judge online status (online if last_activity < 5 min ago)';
+COMMENT ON VIEW judge_online_status IS 'Real-time judge profile online status (online if last_activity < 5 min ago)';
 
 -- View: Team scoring progress for event detail and moderator screens
 CREATE VIEW team_scoring_progress AS
@@ -414,26 +443,24 @@ SELECT
     t.project_title,
     t.status as moderator_status,
     t.presentation_order,
-    COUNT(DISTINCT ss.user_id) FILTER (WHERE ss.submitted_at IS NOT NULL) as judges_completed,
-    COUNT(DISTINCT u.id) FILTER (WHERE u.role = 'judge' AND u.is_active = true) as total_judges,
+    COUNT(DISTINCT ss.judge_id) FILTER (WHERE ss.submitted_at IS NOT NULL) as judges_completed,
+    (SELECT COUNT(*) FROM event_judges WHERE event_id = t.event_id) as total_judges,
     COALESCE(SUM(s.score), 0) as total_score,
     COALESCE(AVG(s.score), 0) as average_score,
     -- Derived status for UI
     CASE 
         WHEN t.status = 'waiting' THEN 'not-scored'
-        WHEN COUNT(DISTINCT ss.user_id) FILTER (WHERE ss.submitted_at IS NOT NULL) = 0 THEN 'not-scored'
-        WHEN COUNT(DISTINCT ss.user_id) FILTER (WHERE ss.submitted_at IS NOT NULL) < 
-             COUNT(DISTINCT u.id) FILTER (WHERE u.role = 'judge' AND u.is_active = true) THEN 'in-progress'
+        WHEN COUNT(DISTINCT ss.judge_id) FILTER (WHERE ss.submitted_at IS NOT NULL) = 0 THEN 'not-scored'
+        WHEN COUNT(DISTINCT ss.judge_id) FILTER (WHERE ss.submitted_at IS NOT NULL) < 
+             (SELECT COUNT(*) FROM event_judges WHERE event_id = t.event_id) THEN 'in-progress'
         ELSE 'scored'
     END as scoring_status
 FROM teams t
-CROSS JOIN users u
-LEFT JOIN score_submissions ss ON t.id = ss.team_id AND ss.user_id = u.id
+LEFT JOIN score_submissions ss ON t.id = ss.team_id
 LEFT JOIN scores s ON t.id = s.team_id
-WHERE u.role = 'judge' AND u.is_active = true
 GROUP BY t.id, t.event_id, t.name, t.project_title, t.status, t.presentation_order;
 
-COMMENT ON VIEW team_scoring_progress IS 'Team scoring status with judge completion counts';
+COMMENT ON VIEW team_scoring_progress IS 'Team scoring status with judge profile completion counts';
 
 -- ============================================================================
 -- SCHEMA COMPLETE

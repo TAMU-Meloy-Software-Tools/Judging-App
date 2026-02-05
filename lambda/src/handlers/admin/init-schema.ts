@@ -29,16 +29,15 @@ export const handler = async (
       await client.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
       await client.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto"`);
 
-      // Create users table with netid for TAMU CAS authentication
+      // Create users table
       await client.query(`
         CREATE TABLE IF NOT EXISTS users (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          netid VARCHAR(20) UNIQUE NOT NULL,
           email VARCHAR(255) UNIQUE NOT NULL,
-          first_name VARCHAR(100) NOT NULL,
-          last_name VARCHAR(100) NOT NULL,
-          role VARCHAR(20) NOT NULL DEFAULT 'participant' 
-            CHECK (role IN ('participant', 'judge', 'moderator', 'admin')),
+          password_hash VARCHAR(255) NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          role VARCHAR(20) NOT NULL DEFAULT 'judge' 
+            CHECK (role IN ('judge', 'admin', 'moderator')),
           is_active BOOLEAN DEFAULT true,
           last_login TIMESTAMP,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -123,28 +122,28 @@ export const handler = async (
           FOREIGN KEY (current_active_team_id) REFERENCES teams(id) ON DELETE SET NULL
       `);
 
-      // Create judge_sessions table (tracks judge login sessions and online status)
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS judge_sessions (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          logged_in_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          logged_out_at TIMESTAMP,
-          UNIQUE(event_id, user_id, logged_in_at)
-        )
-      `);
-
-      // Create event_judges table
+      // Create event_judges table (judge profiles) first
       await client.query(`
         CREATE TABLE IF NOT EXISTS event_judges (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
           event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
           user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          assigned_by UUID REFERENCES users(id),
+          name VARCHAR(255) NOT NULL,
           assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(event_id, user_id)
+          UNIQUE(event_id, name)
+        )
+      `);
+
+      // Create judge_sessions table (tracks judge profile login sessions and online status)
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS judge_sessions (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+          judge_id UUID NOT NULL REFERENCES event_judges(id) ON DELETE CASCADE,
+          logged_in_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          logged_out_at TIMESTAMP,
+          UNIQUE(event_id, judge_id, logged_in_at)
         )
       `);
 
@@ -164,17 +163,19 @@ export const handler = async (
         )
       `);
 
-      // Create score_submissions table (tracks judge progress on each team)
+      // Create score_submissions table (tracks judge profile progress on each team)
       await client.query(`
         CREATE TABLE IF NOT EXISTS score_submissions (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          judge_id UUID NOT NULL REFERENCES event_judges(id) ON DELETE CASCADE,
           event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
           team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
           started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           submitted_at TIMESTAMP,
           time_spent_seconds INTEGER,
-          UNIQUE(user_id, team_id)
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(judge_id, team_id)
         )
       `);
 
@@ -183,13 +184,14 @@ export const handler = async (
         CREATE TABLE IF NOT EXISTS scores (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
           submission_id UUID NOT NULL REFERENCES score_submissions(id) ON DELETE CASCADE,
-          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          judge_id UUID NOT NULL REFERENCES event_judges(id) ON DELETE CASCADE,
           team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
           rubric_criteria_id UUID NOT NULL REFERENCES rubric_criteria(id) ON DELETE CASCADE,
           score INTEGER NOT NULL CHECK (score >= 0 AND score <= 25),
           reflection TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(judge_id, team_id, rubric_criteria_id)
         )
       `);
 
@@ -198,12 +200,12 @@ export const handler = async (
         CREATE TABLE IF NOT EXISTS judge_comments (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
           submission_id UUID NOT NULL REFERENCES score_submissions(id) ON DELETE CASCADE,
-          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          judge_id UUID NOT NULL REFERENCES event_judges(id) ON DELETE CASCADE,
           team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
           comments TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(user_id, team_id)
+          UNIQUE(judge_id, team_id)
         )
       `);
 
@@ -223,7 +225,7 @@ export const handler = async (
       `);
 
       // Create indexes for performance
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_users_netid ON users(netid)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_events_status ON events(status)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_events_judging_phase ON events(judging_phase)`);
@@ -231,18 +233,17 @@ export const handler = async (
       await client.query(`CREATE INDEX IF NOT EXISTS idx_teams_status ON teams(status)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_teams_presentation_order ON teams(event_id, presentation_order)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_team_members_team_id ON team_members(team_id)`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_sessions_event_user ON judge_sessions(event_id, user_id)`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_sessions_active ON judge_sessions(event_id, user_id, last_activity) WHERE logged_out_at IS NULL`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_sessions_last_activity ON judge_sessions(last_activity DESC)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_sessions_event_judge ON judge_sessions(event_id, judge_id)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_sessions_active ON judge_sessions(event_id, judge_id, last_activity) WHERE logged_out_at IS NULL`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_rubric_criteria_order ON rubric_criteria(display_order)`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_score_submissions_user_team ON score_submissions(user_id, team_id)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_score_submissions_judge_team ON score_submissions(judge_id, team_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_score_submissions_event ON score_submissions(event_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_score_submissions_completed ON score_submissions(submitted_at) WHERE submitted_at IS NOT NULL`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_scores_submission ON scores(submission_id)`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_scores_user_team ON scores(user_id, team_id)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_scores_judge_team ON scores(judge_id, team_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_scores_team ON scores(team_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_comments_submission ON judge_comments(submission_id)`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_comments_user_team ON judge_comments(user_id, team_id)`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_judge_comments_judge_team ON judge_comments(judge_id, team_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_activity_log_event ON activity_log(event_id)`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_activity_log_created_at ON activity_log(created_at DESC)`);
     });

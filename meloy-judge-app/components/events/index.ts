@@ -1,2 +1,5 @@
+export { DashboardScreen } from '../dashboard/dashboard-screen'
 export { EventDetailScreen } from './event-detail-screen'
 export { LeaderboardScreen } from './leaderboard-screen'
+export { JudgeProgressScreen } from './judge-progress-screen'
+export { FinalLeaderboardScreen } from './final-leaderboard-screen'

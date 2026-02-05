@@ -2,6 +2,14 @@
  * API Types matching backend database schema
  */
 
+export interface Sponsor {
+    name: string | null;
+    logo_url: string | null;
+    primary_color: string | null;
+    secondary_color: string | null;
+    text_color: string | null;
+}
+
 export interface Event {
     id: string;
     name: string;
@@ -20,6 +28,9 @@ export interface Event {
     current_active_team_id: string | null;
     created_at: string;
     updated_at: string;
+    sponsor?: Sponsor;  // Populated by API join
+    teams_count?: string;  // Populated by API aggregation
+    judges_count?: string;  // Populated by API aggregation
 }
 
 export interface Team {
@@ -32,17 +43,28 @@ export interface Team {
     status: string;
     created_at: string;
     updated_at: string;
+    has_current_user_scored?: boolean;  // Added for judge scoring status
 }
 
 export interface User {
     id: string;
-    netid: string;
     email: string;
-    first_name: string;
-    last_name: string;
-    role: 'admin' | 'moderator' | 'judge' | 'participant';
-    is_active: boolean;
+    name: string;
+    role: 'admin' | 'moderator' | 'judge';
     created_at: string;
+    updated_at: string;
+}
+
+/**
+ * Judge Profile - represents a named judge within an event
+ * Multiple profiles can share the same user account
+ */
+export interface JudgeProfile {
+    id: string;
+    event_id: string;
+    user_id: string;
+    name: string;
+    assigned_at: string;
 }
 
 export interface RubricCriteria {
@@ -60,11 +82,12 @@ export interface RubricCriteria {
 export interface ScoreSubmission {
     eventId: string;
     teamId: string;
+    judgeId: string;  // Judge profile ID, not user ID
     scores: Array<{
-        criteria_id: string;
+        criterionId: string;  // Changed from criteriaId to match backend
         score: number;
     }>;
-    reflections?: Record<string, string>;
+    overallComments?: string;
     timeSpentSeconds?: number;
 }
 
@@ -100,6 +123,21 @@ export interface JudgeSession {
     name: string;
     last_activity: string;
     is_online: boolean;
+}
+
+/**
+ * Judge's scoring progress for an event
+ */
+export interface JudgeProgress {
+    teams: Array<{
+        id: string;
+        name: string;
+        project_name: string;
+        has_scored: boolean;
+    }>;
+    completed: number;
+    total: number;
+    percentage: number;
 }
 
 // API Response wrappers
@@ -138,4 +176,17 @@ export interface InsightsResponse {
 
 export interface JudgesOnlineResponse {
     judges: JudgeSession[];
+}
+
+export interface JudgeProfilesResponse {
+    profiles: JudgeProfile[];
+}
+
+export interface JudgeProgressResponse {
+    progress: JudgeProgress;
+}
+
+export interface SessionStartResponse {
+    sessionId: string;
+    message: string;
 }

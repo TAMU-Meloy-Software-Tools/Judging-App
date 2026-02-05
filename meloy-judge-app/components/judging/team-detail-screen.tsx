@@ -2,6 +2,10 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
+import { getTeam } from "@/lib/api/teams"
+import { getRubric, submitScore } from "@/lib/api/scores"
+import type { Team, RubricCriteria } from "@/lib/types/api"
+import { getJudgeId } from "@/lib/judge-context"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Users, Megaphone, BadgeDollarSign, Presentation, Sparkles, Save, User, CalendarDays, MapPin } from "lucide-react"
+import { ArrowLeft, Users, Megaphone, BadgeDollarSign, Presentation, Sparkles, Save, User, Loader2 } from "lucide-react"
 
 interface TeamDetailScreenProps {
   teamId: string
@@ -26,69 +30,21 @@ interface TeamDetailScreenProps {
   judgeName: string | null
 }
 
-const mockTeam = {
-  id: "1",
-  name: "Team Alpha",
-  projectTitle: "Smart Campus Navigation System",
-  members: ["John Doe", "Jane Smith", "Bob Johnson"],
-  description:
-    "An innovative mobile application that helps students navigate the Texas A&M campus using AR technology and real-time crowd data to find the fastest routes to classes.",
+// Icon mapping for rubric criteria
+const iconMap: Record<string, typeof Megaphone> = {
+  communication: Megaphone,
+  funding: BadgeDollarSign,
+  presentation: Presentation,
+  overall: Sparkles,
+  cohesion: Sparkles,
 }
 
-const scoringCriteria = [
-  {
-    id: "communication",
-    name: "Effective Communication",
-    description: "Was the problem urgent, the solution convincing, and the impact tangible?",
-    maxScore: 25,
-    icon: Megaphone,
-    question:
-      "Notes on clarity and messaging...",
-  },
-  {
-    id: "funding",
-    name: "Would Fund/Buy Solution",
-    description: "Consider technical feasibility, commercial viability, and novelty of the approach.",
-    maxScore: 25,
-    icon: BadgeDollarSign,
-    question:
-      "Thoughts on feasibility and potential...",
-  },
-  {
-    id: "presentation",
-    name: "Presentation",
-    description: "Evaluate the demo assets, storytelling, and overall delivery.",
-    maxScore: 25,
-    icon: Presentation,
-    question: "Observations on delivery and engagement...",
-  },
-  {
-    id: "overall",
-    name: "Overall",
-    description: "Reflect on the pitch strength, Q&A performance, and your gut confidence.",
-    maxScore: 25,
-    icon: Sparkles,
-  question: "General impressions and final thoughts...",
-},
-] satisfies Array<{
-  id: string
-  name: string
-  description: string
-  maxScore: number
-  icon: typeof Megaphone
-  question: string
-}>
-
 export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreenProps) {
-  const [scores, setScores] = useState<Record<string, number>>(
-    scoringCriteria.reduce(
-      (acc, criteria) => ({
-        ...acc,
-        [criteria.id]: 0,
-      }),
-      {},
-    ),
-  )
+  const [team, setTeam] = useState<Team | null>(null)
+  const [rubric, setRubric] = useState<RubricCriteria[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [scores, setScores] = useState<Record<string, number>>({})
   const [reflections, setReflections] = useState<Record<string, string>>({})
   const [comments, setComments] = useState("")
   const [isSaving, setIsSaving] = useState(false)
@@ -96,15 +52,47 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        const [teamData, rubricData] = await Promise.all([
+          getTeam(teamId),
+          getRubric()
+        ])
+        
+        setTeam(teamData.team)
+        setRubric(rubricData.criteria)
+        
+        // Initialize scores with 0 for each criterion
+        const initialScores = rubricData.criteria.reduce(
+          (acc, criteria) => ({
+            ...acc,
+            [criteria.id]: 0,
+          }),
+          {},
+        )
+        setScores(initialScores)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load team data')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [teamId])
+
   // Mock sponsor data - replace with real data later
-  const sponsor = { 
-    name: "ExxonMobil", 
+  const sponsor = {
+    name: "ExxonMobil",
     logo: "/ExxonLogo.png",
     color: "#500000"
   }
 
   const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0)
-  const maxTotalScore = scoringCriteria.reduce((sum, criteria) => sum + criteria.maxScore, 0)
+  const maxTotalScore = rubric.reduce((sum, criteria) => sum + criteria.max_score, 0)
 
   const handleScoreChange = (criteriaId: string, value: number[]) => {
     setScores((prev) => ({
@@ -121,22 +109,45 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
   const confirmSubmit = async () => {
     // Close confirmation dialog
     setShowSubmitDialog(false)
-    
-    // Save scores
-    setIsSaving(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSaving(false)
-    setShowSuccessDialog(true)
-    triggerConfetti()
+
+    try {
+      setIsSaving(true)
+      
+      // Get judgeId from stored judge profile
+      const judgeId = getJudgeId()
+      
+      if (!judgeId) {
+        throw new Error('Judge profile not selected. Please select a judge profile first.')
+      }
+      
+      // Submit scores to API
+      await submitScore({
+        eventId: team!.event_id,
+        teamId: team!.id,
+        judgeId: judgeId,
+        scores: Object.entries(scores).map(([criterionId, score]) => ({
+          criterionId,  // Changed from criteriaId to match backend
+          score,
+        })),
+        overallComments: comments,
+        timeSpentSeconds: 0, // TODO: Track actual time spent
+      })
+      setShowSuccessDialog(true)
+      triggerConfetti()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit scores')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const triggerConfetti = () => {
     const duration = 3000
     const animationEnd = Date.now() + duration
-    const defaults = { 
-      startVelocity: 30, 
-      spread: 360, 
-      ticks: 60, 
+    const defaults = {
+      startVelocity: 30,
+      spread: 360,
+      ticks: 60,
       zIndex: 9999,
       colors: ['#500000', '#800000', '#A52A2A', '#8B0000', '#600000']
     }
@@ -145,7 +156,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
       return Math.random() * (max - min) + min
     }
 
-    const interval: NodeJS.Timeout = setInterval(function() {
+    const interval: NodeJS.Timeout = setInterval(function () {
       const timeLeft = animationEnd - Date.now()
 
       if (timeLeft <= 0) {
@@ -201,6 +212,30 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
     onBack()
   }
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg text-slate-600">Loading team details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !team) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <p className="text-lg text-red-600 mb-4">{error || 'Team not found'}</p>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-primary/5">
       <header className="relative z-30 overflow-hidden border-b bg-linear-to-b from-primary to-[#3d0000] shadow-xl backdrop-blur-sm">
@@ -221,7 +256,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">Team review</p>
-                <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">{mockTeam.name}</h1>
+                <h1 className="text-2xl lg:text-3xl font-semibold text-white leading-tight">{team.name}</h1>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -235,26 +270,26 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
                   <span className="text-xs text-white/70">Admin</span>
                 </div>
               </div>
-              
+
               <Badge className="flex flex-col items-start gap-2 rounded-full border border-white/40 bg-white/20 px-4 py-2 text-sm font-semibold text-white sm:flex-row sm:items-center sm:gap-4">
                 <span>Total Score {totalScore}/{maxTotalScore}</span>
-                <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Team {teamId}</span>
               </Badge>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-6 rounded-4xl border border-white/25 bg-white/10 px-7 py-5 text-white/90">
             <div className="space-y-1.5">
-              <p className="text-[0.7rem] uppercase tracking-[0.24em] text-white/60">Project</p>
-              <p className="text-xl font-semibold text-white">{mockTeam.projectTitle}</p>
+              <p className="text-[0.7rem] uppercase tracking-[0.24em] text-white/60">Description</p>
+              <p className="text-xl font-semibold text-white">{team.description || 'No description available'}</p>
             </div>
-            <div className="space-y-1.5">
-              <p className="text-[0.7rem] uppercase tracking-[0.24em] text-white/60">Team</p>
-              <div className="flex items-center gap-2 text-base text-white/85">
-                <Users className="h-5 w-5" />
-                <span>{mockTeam.members.join(", ")}</span>
+            {team.project_url && (
+              <div className="space-y-1.5">
+                <p className="text-[0.7rem] uppercase tracking-[0.24em] text-white/60">Project URL</p>
+                <a href={team.project_url} target="_blank" rel="noopener noreferrer" className="text-base text-white/85 hover:text-white underline">
+                  {team.project_url}
+                </a>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </header>
@@ -264,7 +299,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
         <div className="relative mb-6 overflow-hidden rounded-3xl border-2 border-red-950 shadow-xl">
           <div className="relative rounded-[22px] py-4 px-5 lg:py-5 lg:px-6 bg-linear-to-b from-red-600 to-red-950">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
-            
+
             <div className="relative flex items-center justify-between">
               {/* Sponsor block */}
               <div className="group relative flex items-center gap-5 lg:gap-6">
@@ -302,9 +337,9 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           </div>
 
           <div className="space-y-7">
-            {scoringCriteria.map((criteria) => {
-              const Icon = criteria.icon
-              const score = scores[criteria.id]
+            {rubric.map((criteria) => {
+              const Icon = iconMap[criteria.short_name.toLowerCase()] || Sparkles
+              const score = scores[criteria.id] || 0
 
               return (
                 <Card key={criteria.id} className="relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/95 shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl">
@@ -321,7 +356,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
                         </div>
                       </div>
                       <Badge className="rounded-full bg-primary/10 px-5 py-3 text-lg font-semibold text-primary shadow-sm">
-                        {score}/{criteria.maxScore}
+                        {score}/{criteria.max_score}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -330,18 +365,18 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
                       <Slider
                         value={[score]}
                         onValueChange={(value) => handleScoreChange(criteria.id, value)}
-                        max={criteria.maxScore}
+                        max={criteria.max_score}
                         step={1}
                         className="w-full py-4 **:data-[slot=slider-track]:h-2 **:data-[slot=slider-thumb]:size-6 sm:**:data-[slot=slider-track]:h-2.5 sm:**:data-[slot=slider-thumb]:size-8"
                         aria-label={`${criteria.name} score`}
                       />
                       <div className="flex justify-between text-base font-semibold text-slate-500">
                         <span className="text-slate-400">0</span>
-                        <span className="text-slate-600">{criteria.maxScore}</span>
+                        <span className="text-slate-600">{criteria.max_score}</span>
                       </div>
                     </div>
                     <div className="space-y-3 rounded-[22px] border border-slate-200/70 bg-slate-50/70 px-5 py-4">
-                      <p className="text-base font-semibold text-slate-600">{criteria.question}</p>
+                      <p className="text-base font-semibold text-slate-600">{criteria.guiding_question}</p>
                       <Textarea
                         value={reflections[criteria.id] ?? ""}
                         onChange={(event) => handleReflectionChange(criteria.id, event.target.value)}
@@ -407,7 +442,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
             <AlertDialogCancel className="h-16 flex-1 rounded-2xl border-2 border-slate-300 text-lg font-semibold text-slate-600 hover:border-primary/40 hover:bg-primary/5">
               Stay and Continue
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmExit}
               className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
             >
@@ -422,7 +457,7 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           {/* Sponsor gradient section at top */}
           <div className="relative h-40 bg-linear-to-b from-red-600 to-red-950 overflow-hidden">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
-            
+
             <div className="relative flex items-center justify-center h-full">
               <div className="flex shrink-0 items-center justify-center rounded-2xl py-4 px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
                 <Image
@@ -440,11 +475,11 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           <AlertDialogHeader className="p-10 pb-6 text-center flex flex-col items-center">
             <AlertDialogTitle className="text-4xl font-bold text-slate-900 mt-4 text-center">Scores Submitted!</AlertDialogTitle>
             <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed text-center">
-              Your evaluation for {mockTeam.name} has been successfully saved.
+              Your evaluation for {team.name} has been successfully saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="p-10 pt-4">
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleSuccessClose}
               className="h-16 w-full rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
             >
@@ -460,16 +495,16 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           <AlertDialogHeader className="p-10 pb-6">
             <AlertDialogTitle className="text-3xl font-bold text-slate-900">Submit Scores?</AlertDialogTitle>
             <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
-              Are you sure you want to submit your evaluation for {mockTeam.name}? This will finalize your scores.
+              Are you sure you want to submit your evaluation for {team.name}? This will finalize your scores.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="p-10 pt-0 flex gap-4">
-            <AlertDialogCancel 
+            <AlertDialogCancel
               className="h-16 flex-1 rounded-2xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400"
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmSubmit}
               className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
             >
@@ -485,16 +520,16 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
           <AlertDialogHeader className="p-10 pb-6">
             <AlertDialogTitle className="text-3xl font-bold text-slate-900">Submit Scores?</AlertDialogTitle>
             <AlertDialogDescription className="mt-4 text-xl text-slate-600 leading-relaxed">
-              Are you sure you want to submit your evaluation for {mockTeam.name}? This will finalize your scores.
+              Are you sure you want to submit your evaluation for {team.name}? This will finalize your scores.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="p-10 pt-0 flex gap-4">
-            <AlertDialogCancel 
+            <AlertDialogCancel
               className="h-16 flex-1 rounded-2xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400"
             >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={confirmSubmit}
               className="h-16 flex-1 rounded-2xl bg-primary text-lg font-semibold text-white shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-xl"
             >

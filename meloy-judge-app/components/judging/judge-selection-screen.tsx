@@ -1,14 +1,13 @@
 "use client"
 
 import Image from "next/image"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, User } from "lucide-react"
-
-interface Judge {
-  id: string
-  name: string
-}
+import { ArrowLeft, User, Loader2 } from "lucide-react"
+import { getJudgeProfiles, startJudgeSession } from "@/lib/api/auth"
+import { setJudgeProfile } from "@/lib/judge-context"
+import type { JudgeProfile } from "@/lib/types/api"
 
 interface JudgeSelectionScreenProps {
   eventId: string
@@ -17,19 +16,72 @@ interface JudgeSelectionScreenProps {
   onBack: () => void
 }
 
-const mockJudges: Judge[] = [
-  { id: "1", name: "Dr. Sarah Smith" },
-  { id: "2", name: "Prof. Michael Johnson" },
-  { id: "3", name: "Dr. Emily Williams" },
-  { id: "4", name: "Dr. James Brown" },
-]
-
 export function JudgeSelectionScreen({ eventId, eventName, onSelectJudge, onBack }: JudgeSelectionScreenProps) {
+  const [judges, setJudges] = useState<JudgeProfile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [selecting, setSelecting] = useState<string | null>(null)
+
   // Mock sponsor data - replace with real data later
   const sponsor = { 
     name: "ExxonMobil", 
     logo: "/ExxonLogo.png",
     color: "#500000"
+  }
+
+  useEffect(() => {
+    async function fetchJudgeProfiles() {
+      try {
+        setLoading(true)
+        const response = await getJudgeProfiles(eventId)
+        setJudges(response.profiles)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load judge profiles')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchJudgeProfiles()
+  }, [eventId])
+
+  const handleSelectJudge = async (profile: JudgeProfile) => {
+    try {
+      setSelecting(profile.id)
+      
+      // Store the judge profile in localStorage
+      setJudgeProfile(profile)
+      
+      // Start the judge session
+      await startJudgeSession(profile.id, eventId)
+      
+      // Call the parent callback
+      onSelectJudge(profile.id, profile.name)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start judge session')
+      setSelecting(null)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-lg text-slate-600">Loading judge profiles...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 via-white to-primary/5">
+        <div className="text-center">
+          <p className="text-lg text-red-600 mb-4">{error}</p>
+          <Button onClick={onBack}>Go Back</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -85,22 +137,32 @@ export function JudgeSelectionScreen({ eventId, eventName, onSelectJudge, onBack
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {mockJudges.map((judge) => (
-            <Card
-              key={judge.id}
-              className="group cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-200/70 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl"
-              onClick={() => onSelectJudge(judge.id, judge.name)}
-            >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 transition-all group-hover:from-primary/30 group-hover:to-primary/20">
-                  <User className="h-10 w-10 text-primary" />
-                </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900">{judge.name}</h3>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {judges.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-lg text-slate-600">No judge profiles found for this event.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {judges.map((judge) => (
+              <Card
+                key={judge.id}
+                className="group cursor-pointer overflow-hidden rounded-2xl border-2 border-slate-200/70 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => !selecting && handleSelectJudge(judge)}
+              >
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 transition-all group-hover:from-primary/30 group-hover:to-primary/20">
+                    {selecting === judge.id ? (
+                      <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                    ) : (
+                      <User className="h-10 w-10 text-primary" />
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-base font-bold text-slate-900">{judge.name}</h3>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   )
