@@ -9,6 +9,7 @@ import type { Screen } from "@/app/page"
 import { ArrowLeft, BarChart3, Users, CheckCircle2, Clock, Circle, MapPin, CalendarDays, Activity, Settings, User, Loader2 } from "lucide-react"
 import { getEvent, getEventTeams } from "@/lib/api"
 import type { Event, Team } from "@/lib/types/api"
+import { getJudgeId } from "@/lib/judge-context"
 
 interface EventDetailScreenProps {
   eventId: string
@@ -32,9 +33,10 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
       try {
         setLoading(true)
         setError(null)
+        const judgeId = getJudgeId()
         const [eventData, teamsData] = await Promise.all([
           getEvent(eventId),
-          getEventTeams(eventId, true)  // activeOnly=true for judges
+          getEventTeams(eventId, { activeOnly: true, judgeId: judgeId || undefined })  // activeOnly=true for judges, filter completed teams
         ])
         setEvent(eventData.event)
         setTeams(teamsData.teams)
@@ -55,8 +57,6 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
   // Calculate team statistics from RDS data
   const totalCount = teams.length
   const scoredCount = teams.filter(t => t.has_current_user_scored).length
-  const inProgressCount = 0 // Could track partially completed in future
-  const notScoredCount = totalCount - scoredCount - inProgressCount
 
   // Get event logo based on event type
   const eventLogoSrc = isPWSEvent ? "/pws.png" : "/aggiesinvent.png"
@@ -256,57 +256,12 @@ export function EventDetailScreen({ eventId, onSelectTeam, onBack, onNavigate, o
           </div>
         </div>
 
-        {/* Metric cards with visual connection to event info banner */}
-        <section className="relative mb-4 grid grid-cols-3 gap-4">
-          {/* Subtle connecting gradient fade from banner to metrics */}
-          <div className="absolute -top-4 left-0 right-0 h-6 bg-linear-to-b from-slate-50/30 to-transparent pointer-events-none" />
-
-          <div className="group relative overflow-hidden rounded-2xl border-2 border-emerald-200 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-emerald-300">
-            <div className="absolute inset-0 bg-linear-to-br from-emerald-200/60 via-emerald-100/40 to-transparent" />
-            <div className="relative flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">{participantsLabel} scored</p>
-                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{scoredCount}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-2xl border-2 border-amber-200 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-amber-300">
-            <div className="absolute inset-0 bg-linear-to-br from-amber-200/60 via-amber-100/40 to-transparent" />
-            <div className="relative flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-                <Clock className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">In progress</p>
-                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{inProgressCount}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-300 bg-white/90 p-5 shadow-lg backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-slate-400">
-            <div className="absolute inset-0 bg-linear-to-br from-slate-200/60 via-slate-100/40 to-transparent" />
-            <div className="relative flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/80 shadow-sm">
-                <Circle className="h-5 w-5 text-slate-500" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Awaiting scoring</p>
-                <p className="mt-0.5 text-2xl font-semibold text-slate-900">{notScoredCount}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <div className="mt-10 space-y-5">
+        <div className="mt-6 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-3xl font-semibold text-slate-900">{participantLabel} roster</h2>
               <p className="text-sm text-slate-500">
-                Tracking {scoredCount} scored, {inProgressCount} in progress, {notScoredCount} awaiting review
+                {scoredCount} of {totalCount} {participantsLabel.toLowerCase()} scored
               </p>
             </div>
           </div>

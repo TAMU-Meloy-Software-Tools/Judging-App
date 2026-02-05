@@ -133,63 +133,12 @@ export function TeamDetailScreen({ teamId, onBack, judgeName }: TeamDetailScreen
         timeSpentSeconds: 0, // TODO: Track actual time spent
       })
       setShowSuccessDialog(true)
-      triggerConfetti()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit scores')
     } finally {
       setIsSaving(false)
     }
   }
-
-  const triggerConfetti = () => {
-    const duration = 3000
-    const animationEnd = Date.now() + duration
-    const defaults = {
-      startVelocity: 30,
-      spread: 360,
-      ticks: 60,
-      zIndex: 9999,
-      colors: ['#500000', '#800000', '#A52A2A', '#8B0000', '#600000']
-    }
-
-    function randomInRange(min: number, max: number) {
-      return Math.random() * (max - min) + min
-    }
-
-    const interval: NodeJS.Timeout = setInterval(function () {
-      const timeLeft = animationEnd - Date.now()
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval)
-      }
-
-      const particleCount = 50 * (timeLeft / duration)
-
-      // Create confetti from multiple positions
-      if (typeof window !== 'undefined' && (window as any).confetti) {
-        (window as any).confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-        });
-        (window as any).confetti({
-          ...defaults,
-          particleCount,
-          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-        });
-      }
-    }, 250)
-  }
-
-  useEffect(() => {
-    // Load confetti library
-    if (typeof window !== 'undefined' && !(window as any).confetti) {
-      const script = document.createElement('script')
-      script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js'
-      script.async = true
-      document.body.appendChild(script)
-    }
-  }, [])
 
   const handleSuccessClose = () => {
     setShowSuccessDialog(false)

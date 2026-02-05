@@ -97,8 +97,8 @@ export function FinalLeaderboardScreen({ eventId, onBack, judgeName }: FinalLead
             label: "Average Score",
             value: `${averageScore} pts`,
             icon: BarChart3,
-            iconColor: "text-sky-500",
-            bgColor: "from-sky-200/60 via-sky-100/40 to-transparent",
+            iconColor: "text-primary",
+            bgColor: "from-primary/25 via-primary/10 to-transparent",
         },
     ]
 

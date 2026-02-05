@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +16,8 @@ import {
   BarChart3,
   User,
   Loader2,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react"
 import {
   AlertDialog,
@@ -69,6 +71,41 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
+  const [showLeftScroll, setShowLeftScroll] = useState(false)
+  const [showRightScroll, setShowRightScroll] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Handle scroll indicators
+  useEffect(() => {
+    const checkScroll = () => {
+      const container = scrollContainerRef.current
+      if (!container) return
+
+      const { scrollLeft, scrollWidth, clientWidth } = container
+      const isAtStart = scrollLeft <= 5
+      const isAtEnd = scrollLeft + clientWidth >= scrollWidth - 5
+
+      setShowLeftScroll(!isAtStart)
+      setShowRightScroll(!isAtEnd)
+    }
+
+    const container = scrollContainerRef.current
+    if (container) {
+      // Check initially
+      checkScroll()
+      
+      // Add scroll listener
+      container.addEventListener('scroll', checkScroll)
+      
+      // Check on window resize
+      window.addEventListener('resize', checkScroll)
+      
+      return () => {
+        container.removeEventListener('scroll', checkScroll)
+        window.removeEventListener('resize', checkScroll)
+      }
+    }
+  }, [teams])
 
   // Fetch data from RDS with real-time updates
   useEffect(() => {
@@ -259,277 +296,246 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
             </div>
           </div>
 
-          <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            <Card className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-3 lg:p-6 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="absolute inset-0 bg-linear-to-br from-primary/25 via-primary/10 to-transparent" />
-              <div className="relative flex items-center gap-3 lg:gap-4">
-                <div className="flex h-10 w-10 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl bg-white/80">
-                  <Users className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
+          {/* Team Queue - Horizontal Layout */}
+          <Card className="relative mb-6 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
+            <CardHeader className="px-6 pt-5 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10">
+                  <Users className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[10px] lg:text-sm font-semibold uppercase tracking-[0.1em] lg:tracking-[0.15em] text-slate-500">Total Teams</p>
-                  <p className="mt-0.5 text-xl lg:text-3xl font-semibold text-slate-900">{teams.length}</p>
+                  <CardTitle className="text-xl font-semibold text-slate-900">Team Queue</CardTitle>
+                  <CardDescription className="text-base text-slate-600">
+                    Control judging flow and team status • {teamsCompleted}/{teams.length} completed ({completionPercent}%)
+                  </CardDescription>
                 </div>
               </div>
-            </Card>
-
-            <Card className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-3 lg:p-6 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="absolute inset-0 bg-linear-to-br from-primary/25 via-primary/10 to-transparent" />
-              <div className="relative flex items-center gap-3 lg:gap-4">
-                <div className="flex h-10 w-10 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl bg-white/80">
-                  <Clock className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
+            </CardHeader>
+            <CardContent className="px-6 pb-5 pt-2">
+              <div className="relative">
+                {/* Left scroll indicator */}
+                <div 
+                  className={`absolute left-0 top-0 bottom-0 w-20 pointer-events-none z-10 flex items-center justify-start transition-opacity duration-300 ${
+                    showLeftScroll ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <div className="absolute inset-0 bg-linear-to-r from-white/95 to-transparent" />
+                  <ChevronLeft className="relative h-8 w-8 text-slate-400 ml-2" />
                 </div>
-                <div>
-                  <p className="text-[10px] lg:text-sm font-semibold uppercase tracking-[0.1em] lg:tracking-[0.15em] text-slate-500">Active</p>
-                  <p className="mt-0.5 text-xl lg:text-3xl font-semibold text-slate-900">{teamsActive}</p>
+
+                {/* Right scroll indicator */}
+                <div 
+                  className={`absolute right-0 top-0 bottom-0 w-20 pointer-events-none z-10 flex items-center justify-end transition-opacity duration-300 ${
+                    showRightScroll ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <div className="absolute inset-0 bg-linear-to-l from-white/95 to-transparent" />
+                  <ChevronRight className="relative h-8 w-8 text-slate-400 mr-2" />
                 </div>
-              </div>
-            </Card>
+                
+                {/* Scrollable container - proper padding to prevent cutoff */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex gap-4 overflow-x-auto pb-1 pt-1 px-1 scroll-smooth"
+                  style={{ 
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
+                  <style jsx>{`
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
+                {teams.sort((a, b) => a.order - b.order).map((team) => {
+                  const isCompleted = team.status === "completed"
+                  const isActive = team.status === "active"
+                  const isWaiting = team.status === "waiting"
 
-            <Card className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-3 lg:p-6 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="absolute inset-0 bg-linear-to-br from-primary/25 via-primary/10 to-transparent" />
-              <div className="relative flex items-center gap-3 lg:gap-4">
-                <div className="flex h-10 w-10 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl bg-white/80">
-                  <CheckCircle2 className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] lg:text-sm font-semibold uppercase tracking-[0.1em] lg:tracking-[0.15em] text-slate-500">Completed</p>
-                  <p className="mt-0.5 text-xl lg:text-3xl font-semibold text-slate-900">{teamsCompleted}</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 p-3 lg:p-6 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-              <div className="absolute inset-0 bg-linear-to-br from-primary/25 via-primary/10 to-transparent" />
-              <div className="relative flex items-center gap-3 lg:gap-4">
-                <div className="flex h-10 w-10 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl bg-white/80">
-                  <BarChart3 className="h-5 w-5 lg:h-6 lg:w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[10px] lg:text-sm font-semibold uppercase tracking-[0.1em] lg:tracking-[0.15em] text-slate-500">Progress</p>
-                  <p className="mt-0.5 text-xl lg:text-3xl font-semibold text-slate-900">{completionPercent}%</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-5">
-              <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
-
-                <CardHeader className="p-6 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl font-semibold text-slate-900">Team Queue</CardTitle>
-                      <CardDescription className="text-base text-slate-600">
-                        Control judging flow and team status
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 pt-2">
-                  <div className="space-y-3">
-                    {teams.sort((a, b) => a.order - b.order).map((team) => {
-                      const isCompleted = team.status === "completed"
-                      const isActive = team.status === "active"
-                      const isWaiting = team.status === "waiting"
-
-                      return (
-                        <div
-                          key={team.id}
-                          className="group relative overflow-hidden rounded-[20px] border-2 border-primary/20 bg-linear-to-br from-primary/5 to-white p-5 transition-all hover:scale-[1.02] hover:shadow-lg hover:border-primary/30"
-                        >
-
-                          <div className="flex items-start gap-4">
-                            {/* Order badge with maroon gradient */}
-                            <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-[#3d0000] font-bold text-white shadow-md">
-                              <span className="text-2xl">{team.order}</span>
-                              <div className={`absolute -top-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${isCompleted
-                                ? "bg-emerald-400"
-                                : isActive
-                                  ? "bg-sky-400 animate-pulse"
-                                  : "bg-amber-400"
-                                }`} />
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              {/* Team info */}
-                              <div className="mb-3">
-                                <h4 className="font-bold text-lg text-slate-900 mb-1">{team.name}</h4>
-                                <p className="text-sm text-slate-600 font-medium">{team.projectTitle}</p>
-                              </div>
-
-                              {/* Status controls with maroon theme */}
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant={isWaiting ? "default" : "outline"}
-                                  onClick={() => handleStatusChange(team.id, "waiting")}
-                                  disabled={eventStatus === "ended"}
-                                  className={`h-9 flex-1 rounded-xl text-xs font-bold shadow-sm transition-all ${isWaiting
-                                    ? "bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0 shadow-amber-200"
-                                    : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
-                                    } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
-                                >
-                                  Waiting
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={isActive ? "default" : "outline"}
-                                  onClick={() => handleStatusChange(team.id, "active")}
-                                  disabled={eventStatus === "ended"}
-                                  className={`h-9 flex-1 rounded-xl text-xs font-bold shadow-sm transition-all ${isActive
-                                    ? "bg-linear-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white border-0 shadow-sky-200"
-                                    : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
-                                    } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
-                                >
-                                  <Play className="h-3.5 w-3.5 mr-1" />
-                                  Active
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant={isCompleted ? "default" : "outline"}
-                                  onClick={() => handleStatusChange(team.id, "completed")}
-                                  disabled={eventStatus === "ended"}
-                                  className={`h-9 flex-1 rounded-xl text-xs font-bold shadow-sm transition-all ${isCompleted
-                                    ? "bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white border-0 shadow-emerald-200"
-                                    : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
-                                    } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
-                                >
-                                  Complete
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+                  return (
+                    <div
+                      key={team.id}
+                      className="group relative shrink-0 w-[320px] overflow-visible rounded-[20px] border-2 border-primary/20 bg-linear-to-br from-primary/5 to-white p-5 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-primary/30"
+                    >
+                      {/* Order badge with status indicator */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-primary to-[#3d0000] font-bold text-white shadow-md">
+                          <span className="text-xl">{team.order}</span>
+                          <div className={`absolute -top-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${isCompleted
+                            ? "bg-emerald-400"
+                            : isActive
+                              ? "bg-sky-400 animate-pulse"
+                              : "bg-amber-400"
+                            }`} />
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-lg text-slate-900 truncate">{team.name}</h4>
+                          <p className="text-sm text-slate-600 truncate">{team.projectTitle}</p>
+                        </div>
+                      </div>
+
+                      {/* Status controls */}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant={isWaiting ? "default" : "outline"}
+                          onClick={() => handleStatusChange(team.id, "waiting")}
+                          disabled={eventStatus === "ended"}
+                          className={`h-10 flex-1 rounded-xl text-sm font-bold shadow-sm transition-all ${isWaiting
+                            ? "bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-amber-200"
+                            : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
+                            } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          Wait
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={isActive ? "default" : "outline"}
+                          onClick={() => handleStatusChange(team.id, "active")}
+                          disabled={eventStatus === "ended"}
+                          className={`h-10 flex-1 rounded-xl text-sm font-bold shadow-sm transition-all ${isActive
+                            ? "bg-sky-500 hover:bg-sky-600 text-white border-0 shadow-sky-200"
+                            : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
+                            } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          Active
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={isCompleted ? "default" : "outline"}
+                          onClick={() => handleStatusChange(team.id, "completed")}
+                          disabled={eventStatus === "ended"}
+                          className={`h-10 flex-1 rounded-xl text-sm font-bold shadow-sm transition-all ${isCompleted
+                            ? "bg-emerald-500 hover:bg-emerald-600 text-white border-0 shadow-emerald-200"
+                            : "border-2 border-primary/20 text-slate-700 hover:bg-primary/5 hover:border-primary/30"
+                            } ${eventStatus === "ended" ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          Done
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Live Scoring - Full Width */}
+          <Card className="relative mb-6 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
+            <CardHeader className="p-6 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-semibold text-slate-900">Live Scoring</CardTitle>
+                    <CardDescription className="text-base text-slate-600">
+                      Real-time scores from all judges (max 400 points per team)
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2.5 w-2.5 rounded-full ${isRefreshing ? 'bg-sky-500 animate-pulse' : 'bg-emerald-500'}`} />
+                  <span className="text-xs text-slate-500">
+                    {isRefreshing ? 'Updating...' : 'Live'}
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 pt-2">
+              <div className="rounded-xl border border-primary/20 bg-white overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-white border-b border-primary/20">
+                      <th className="bg-linear-to-br from-primary to-[#3d0000] px-4 py-3 text-left w-[200px] border-r border-white/20">
+                        <p className="text-xs font-semibold text-white">Team</p>
+                      </th>
+                      {judges.map((judge) => (
+                        <th key={judge.id} className="bg-linear-to-br from-primary to-[#3d0000] px-3 py-3 border-r border-white/20">
+                          <p className="text-xs font-semibold text-white text-center">{judge.name}</p>
+                          <div className="mt-1 flex justify-center">
+                            <div className={`h-2 w-2 rounded-full transition-colors ${judge.isOnline ? "bg-emerald-400" : "bg-slate-300"}`} />
+                          </div>
+                        </th>
+                      ))}
+                      <th className="bg-linear-to-br from-primary to-[#3d0000] px-3 py-3 w-[100px] border-r border-white/20">
+                        <p className="text-xs font-semibold text-white text-center">Total</p>
+                      </th>
+                      <th className="bg-linear-to-br from-primary to-[#3d0000] px-3 py-3 w-[80px]">
+                        <p className="text-xs font-semibold text-white text-center">%</p>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {teams.sort((a, b) => getTeamTotal(b) - getTeamTotal(a)).map((team, index) => {
+                      const total = getTeamTotal(team)
+                      const percentage = Math.round((total / 400) * 100)
+                      return (
+                        <tr key={team.id} className="bg-primary/5 hover:bg-primary/10 transition-all duration-300 border-b border-primary/10 last:border-0">
+                          <td className="bg-white px-4 py-3 border-r border-primary/10">
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                className={`h-6 w-6 rounded-lg p-0 flex items-center justify-center text-xs font-bold shrink-0 ${team.status === "completed"
+                                  ? "bg-emerald-500 text-white"
+                                  : team.status === "active"
+                                    ? "bg-sky-500 text-white"
+                                    : "bg-amber-500 text-white"
+                                  }`}
+                              >
+                                {index + 1}
+                              </Badge>
+                              <p className="font-medium text-slate-900 text-sm">{team.name}</p>
+                            </div>
+                          </td>
+                          {team.scores.map((score) => (
+                            <td key={score.judgeId} className="bg-white px-3 py-3 border-r border-primary/10 transition-all duration-500">
+                              <div className="flex flex-col items-center">
+                                {score.score !== null ? (
+                                  <>
+                                    <span className="text-base font-bold text-slate-900">{score.score}</span>
+                                    <span className="text-xs text-slate-500">/100</span>
+                                    <div className="mt-1.5 h-1.5 w-full bg-slate-200 rounded-full overflow-hidden max-w-[80px]">
+                                      <div
+                                        className="h-full rounded-full bg-linear-to-r from-primary to-[#3d0000] transition-all duration-500"
+                                        style={{ width: `${score.score}%` }}
+                                      />
+                                    </div>
+                                  </>
+                                ) : (
+                                  <span className="inline-flex h-8 w-12 items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-400">
+                                    —
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          ))}
+                          <td className="bg-white px-3 py-3 border-r border-primary/10 transition-all duration-500">
+                            <div className="text-center">
+                              <span className="text-lg font-bold text-slate-900">{total}</span>
+                              <br />
+                              <span className="text-xs text-slate-500">/400</span>
+                            </div>
+                          </td>
+                          <td className="bg-white px-3 py-3 transition-all duration-500">
+                            <div className="text-center">
+                              <span className="text-base font-semibold text-primary">{percentage}%</span>
+                            </div>
+                          </td>
+                        </tr>
                       )
                     })}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
 
-            <div className="lg:col-span-7">
-              <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
-
-                <CardHeader className="p-6 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/10">
-                        <BarChart3 className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl font-semibold text-slate-900">Live Scoring</CardTitle>
-                        <CardDescription className="text-base text-slate-600">
-                          Real-time scores from all judges (max 400 points per team)
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2.5 w-2.5 rounded-full ${isRefreshing ? 'bg-sky-500 animate-pulse' : 'bg-emerald-500'}`} />
-                      <span className="text-xs text-slate-500">
-                        {isRefreshing ? 'Updating...' : 'Live'}
-                      </span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6 pt-2">
-                  <div className="overflow-x-auto -mx-2 px-2">
-                    <div className="rounded-xl border border-primary/20 bg-white overflow-hidden min-w-[800px]">
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="bg-white border-b border-primary/20">
-                              <th className="sticky left-0 z-10 bg-linear-to-br from-primary to-[#3d0000] px-3 py-3 text-left min-w-[140px] max-w-[200px] border-r border-white/20">
-                                <p className="text-xs font-semibold text-white">Team</p>
-                              </th>
-                              {judges.map((judge) => (
-                                <th key={judge.id} className="bg-linear-to-br from-primary to-[#3d0000] px-2 py-3 w-[90px] min-w-[90px] max-w-[90px] border-r border-white/20">
-                                  <p className="text-xs font-semibold text-white text-center truncate px-1" title={judge.name}>
-                                    {judge.name.split(' ').map(n => n[0]).join('.')}
-                                  </p>
-                                  <div className="mt-1 flex justify-center">
-                                    <div className={`h-2 w-2 rounded-full transition-colors ${judge.isOnline ? "bg-emerald-400" : "bg-slate-300"}`} />
-                                  </div>
-                                </th>
-                              ))}
-                              <th className="sticky right-[60px] z-10 bg-linear-to-br from-primary to-[#3d0000] px-2 py-3 w-[70px] min-w-[70px] border-r border-white/20">
-                                <p className="text-xs font-semibold text-white text-center">Total</p>
-                              </th>
-                              <th className="sticky right-0 z-10 bg-linear-to-br from-primary to-[#3d0000] px-2 py-3 w-[60px] min-w-[60px]">
-                                <p className="text-xs font-semibold text-white text-center">%</p>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {teams.sort((a, b) => getTeamTotal(b) - getTeamTotal(a)).map((team, index) => {
-                              const total = getTeamTotal(team)
-                              const percentage = Math.round((total / 400) * 100)
-                              return (
-                                <tr key={team.id} className="bg-primary/5 hover:bg-primary/10 transition-all duration-300 border-b border-primary/10 last:border-0">
-                                  <td className="sticky left-0 z-10 bg-white px-3 py-3 border-r border-primary/10 shadow-sm">
-                                    <div className="flex items-center gap-2">
-                                      <Badge
-                                        className={`h-5 w-5 rounded-lg p-0 flex items-center justify-center text-xs font-bold shrink-0 ${team.status === "completed"
-                                          ? "bg-emerald-500 text-white"
-                                          : team.status === "active"
-                                            ? "bg-sky-500 text-white"
-                                            : "bg-amber-500 text-white"
-                                          }`}
-                                      >
-                                        {index + 1}
-                                      </Badge>
-                                      <p className="font-medium text-slate-900 text-sm truncate" title={team.name}>{team.name}</p>
-                                    </div>
-                                  </td>
-                                  {team.scores.map((score) => (
-                                    <td key={score.judgeId} className="bg-white px-1.5 py-3 border-r border-primary/10 transition-all duration-500">
-                                      <div className="flex flex-col items-center">
-                                        {score.score !== null ? (
-                                          <>
-                                            <span className="text-sm font-bold text-slate-900">{score.score}</span>
-                                            <div className="mt-1 h-1 w-full bg-slate-200 rounded-full overflow-hidden max-w-[50px]">
-                                              <div
-                                                className="h-full rounded-full bg-linear-to-r from-primary to-[#3d0000] transition-all duration-500"
-                                                style={{ width: `${score.score}%` }}
-                                              />
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <span className="inline-flex h-7 w-10 items-center justify-center rounded-lg bg-slate-100 text-xs text-slate-400">
-                                            —
-                                          </span>
-                                        )}
-                                      </div>
-                                    </td>
-                                  ))}
-                                  <td className="sticky right-[60px] z-10 bg-white px-2 py-3 border-r border-primary/10 shadow-sm transition-all duration-500">
-                                    <div className="text-center">
-                                      <span className="text-base font-bold text-slate-900">{total}</span>
-                                    </div>
-                                  </td>
-                                  <td className="sticky right-0 z-10 bg-white px-2 py-3 shadow-sm transition-all duration-500">
-                                    <div className="text-center">
-                                      <span className="text-sm font-semibold text-primary">{percentage}%</span>
-                                    </div>
-                                  </td>
-                                </tr>
-                              )
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="relative mt-6 overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
-
-                <CardContent className="p-6">
+          {/* Event Control - Full Width */}
+          <Card className="relative overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/95">
+            <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-semibold text-slate-900">Event Control</h3>
@@ -572,10 +578,8 @@ export function ModeratorScreen({ eventId, onBack }: ModeratorScreenProps) {
                       </AlertDialogContent>
                     </AlertDialog>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

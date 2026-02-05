@@ -29,6 +29,20 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
             return res.status(403).json({ error: 'Invalid judge profile for this event/user' });
         }
 
+        // Check if team is already completed (judges cannot re-score completed teams)
+        const teamStatus = await query(
+            'SELECT status FROM teams WHERE id = $1 AND event_id = $2',
+            [teamId, eventId]
+        );
+
+        if (!teamStatus || teamStatus.length === 0) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        if (teamStatus[0].status === 'completed') {
+            return res.status(403).json({ error: 'Cannot score completed teams' });
+        }
+
         await transaction(async (client) => {
             // Create or update score submission
             const submissionResult = await client.query(
@@ -64,6 +78,12 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
                     [submissionId, judgeId, teamId, overallComments]
                 );
             }
+
+            // Update team status to 'completed' when scores are submitted
+            await client.query(
+                `UPDATE teams SET status = 'completed', updated_at = NOW() WHERE id = $1`,
+                [teamId]
+            );
         });
 
         return res.json({ message: 'Scores submitted successfully' });

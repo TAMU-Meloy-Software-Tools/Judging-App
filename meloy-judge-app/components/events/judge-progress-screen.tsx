@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, BarChart3, MessageSquare, TrendingUp, Users, Clock, Megaphone, BadgeDollarSign, Presentation, Sparkles, User, Loader2 } from "lucide-react"
 import { getEvent, getMyProgress } from "@/lib/api"
 import type { Event } from "@/lib/types/api"
+import { getJudgeId } from "@/lib/judge-context"
 
 interface JudgeProgressScreenProps {
     eventId: string
@@ -61,13 +62,35 @@ export function JudgeProgressScreen({ eventId, onBack, judgeName }: JudgeProgres
             try {
                 setLoading(true)
                 setError(null)
+                
+                // Get judge ID from context
+                const judgeId = getJudgeId()
+                
+                // If no judge profile is selected, show empty state (user might be admin/moderator viewing)
+                if (!judgeId) {
+                    const { event: eventData } = await getEvent(eventId)
+                    setEvent(eventData)
+                    setJudgeScores([])
+                    setLoading(false)
+                    return
+                }
+                
                 const [eventData, progressData] = await Promise.all([
                     getEvent(eventId),
-                    getMyProgress(eventId)
+                    getMyProgress(eventId, judgeId)
                 ])
+                
                 setEvent(eventData.event)
                 // API now returns array directly, not wrapped in object
-                setJudgeScores(Array.isArray(progressData) ? progressData : [])
+                // Filter out incomplete submissions (no scores/breakdown)
+                const completedScores = Array.isArray(progressData) 
+                    ? progressData.filter((team: any) => 
+                        team.totalScore > 0 && 
+                        team.breakdown && 
+                        Object.keys(team.breakdown).length > 0
+                      )
+                    : []
+                setJudgeScores(completedScores)
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load judge progress data')
             } finally {
@@ -136,16 +159,16 @@ export function JudgeProgressScreen({ eventId, onBack, judgeName }: JudgeProgres
             label: "Average Score",
             value: averageScore.toString(),
             icon: BarChart3,
-            iconColor: "text-sky-500",
-            bgColor: "from-sky-200/60 via-sky-100/40 to-transparent",
+            iconColor: "text-primary",
+            bgColor: "from-primary/25 via-primary/10 to-transparent",
         },
         {
             id: "highest-score",
             label: "Highest Score",
             value: highestScore.toString(),
             icon: TrendingUp,
-            iconColor: "text-emerald-500",
-            bgColor: "from-emerald-200/60 via-emerald-100/40 to-transparent",
+            iconColor: "text-primary",
+            bgColor: "from-primary/25 via-primary/10 to-transparent",
         },
     ]
 

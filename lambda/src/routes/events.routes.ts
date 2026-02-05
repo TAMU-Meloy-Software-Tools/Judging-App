@@ -280,8 +280,10 @@ router.get('/:eventId/teams', authenticate, async (req: AuthRequest, res) => {
         const activeOnly = req.query.activeOnly === 'true';
         const judgeId = req.query.judgeId as string | undefined;
 
-        // Build status filter for judges who should only see active teams
-        const statusFilter = activeOnly ? "AND t.status = 'active'" : '';
+        // Build status filter:
+        // - If activeOnly=true (judges view), only show active teams (not completed)
+        // - Otherwise (admin/moderator view), show all teams
+        const statusFilter = activeOnly ? "AND t.status IN ('waiting', 'active')" : '';
 
         // If judgeId provided, check if that judge profile has scored each team
         const hasCurrentJudgeScoredClause = judgeId
