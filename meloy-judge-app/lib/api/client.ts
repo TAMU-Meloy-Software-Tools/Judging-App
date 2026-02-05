@@ -4,10 +4,6 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-if (typeof window !== 'undefined') {
-    console.log('🔍 API_URL:', API_URL || '(empty - not set!)');
-}
-
 if (!API_URL && typeof window !== 'undefined') {
     console.warn('NEXT_PUBLIC_API_URL is not set');
 }
