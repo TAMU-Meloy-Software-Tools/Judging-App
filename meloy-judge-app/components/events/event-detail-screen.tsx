@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Screen } from "@/app/page"
+import type { Screen } from "@/components/app-shell"
 import { ArrowLeft, BarChart3, Users, CheckCircle2, Clock, Circle, MapPin, CalendarDays, Activity, Settings, User, Loader2, Menu, Shield, ExternalLink, ChevronDown, UserCircle2 } from "lucide-react"
 import { getEvent, getEventTeams } from "@/lib/api"
 import type { Event, Team } from "@/lib/types/api"

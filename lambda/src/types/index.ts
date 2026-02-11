@@ -27,6 +27,7 @@ export interface Event {
   min_team_size?: number;
   max_teams?: number;
   sponsor_id?: string;
+  judge_user_id?: string;
   judging_phase: 'not-started' | 'in-progress' | 'ended';
   current_active_team_id?: string;
   created_at: Date;

@@ -7,9 +7,11 @@ const router = Router();
 // ==================== EVENTS ====================
 
 /**
- * Get all events with optional filtering
+ * Get all events with role-based filtering
+ * - Judges: Only see events they're assigned to via event_judges table
+ * - Admins/Moderators: See all events
  */
-router.get('/', async (req, res) => {
+router.get('/', authenticate, async (req: AuthRequest, res) => {
     try {
         const { status, type } = req.query;
         const conditions: string[] = ['1=1'];
@@ -24,6 +26,15 @@ router.get('/', async (req, res) => {
         if (type) {
             conditions.push(`e.event_type = $${paramIndex++}`);
             params.push(type);
+        }
+
+        // CRITICAL: Judges should only see events they're assigned to
+        if (req.user?.role === 'judge' && req.user?.id) {
+            conditions.push(`e.id IN (SELECT event_id FROM event_judges WHERE user_id = $${paramIndex++})`);
+            params.push(req.user.id);
+            console.log('Filtering events for judge:', req.user.id);
+        } else {
+            console.log('Showing all events for role:', req.user?.role);
         }
 
         const events = await query(
@@ -45,8 +56,11 @@ router.get('/', async (req, res) => {
             params
         );
 
+        console.log(`Found ${events.length} events for user ${req.user?.id} (role: ${req.user?.role})`);
+
         res.json({ events, total: events.length });
     } catch (error) {
+        console.error('Failed to fetch events:', error);
         res.status(500).json({ error: 'Failed to fetch events' });
     }
 });
@@ -65,9 +79,15 @@ router.get('/:id', async (req, res): Promise<void> => {
           'primary_color', s.primary_color,
           'secondary_color', s.secondary_color,
           'text_color', s.text_color
-       ) as sponsor
+       ) as sponsor,
+        json_build_object(
+          'id', ju.id,
+          'email', ju.email,
+          'name', ju.name
+       ) as judge_user
       FROM events e
       LEFT JOIN sponsors s ON e.sponsor_id = s.id
+      LEFT JOIN users ju ON e.judge_user_id = ju.id
       WHERE e.id = $1`,
             [req.params.id]
         );
@@ -174,6 +194,66 @@ router.delete('/:eventId', authenticate, requireRole(['admin']), async (req, res
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete event' });
+    }
+});
+
+/**
+ * Update event's dedicated judge account (admin only)
+ */
+router.put('/:eventId/judge-account', authenticate, requireRole(['admin']), async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const { userEmail } = req.body;
+
+        if (!userEmail) {
+            res.status(400).json({ error: 'User email is required' });
+            return;
+        }
+
+        // Find user by email
+        const user = await queryOne(
+            'SELECT id, email, name, role FROM users WHERE email = $1',
+            [userEmail]
+        );
+
+        if (!user) {
+            res.status(404).json({ error: 'User not found with that email' });
+            return;
+        }
+
+        // Update event's judge_user_id
+        const event = await queryOne(
+            `UPDATE events 
+             SET judge_user_id = $1, updated_at = NOW() 
+             WHERE id = $2 
+             RETURNING *`,
+            [user.id, eventId]
+        );
+
+        if (!event) {
+            res.status(404).json({ error: 'Event not found' });
+            return;
+        }
+
+        // Return updated event with judge user info
+        const updatedEvent = await queryOne(
+            `SELECT 
+                e.*,
+                json_build_object(
+                    'id', ju.id,
+                    'email', ju.email,
+                    'name', ju.name
+                ) as judge_user
+             FROM events e
+             LEFT JOIN users ju ON e.judge_user_id = ju.id
+             WHERE e.id = $1`,
+            [eventId]
+        );
+
+        res.json({ event: updatedEvent });
+    } catch (error) {
+        console.error('Failed to update judge account:', error);
+        res.status(500).json({ error: 'Failed to update judge account' });
     }
 });
 
@@ -340,13 +420,13 @@ router.get('/:eventId/teams', authenticate, async (req: AuthRequest, res) => {
  */
 router.post('/:eventId/teams', authenticate, requireRole(['admin']), async (req: AuthRequest, res) => {
     try {
-        const { name, description, project_url, presentation_order } = req.body;
+        const { name, description, project_url, presentation_order, photo_url } = req.body;
 
         const team = await queryOne(
-            `INSERT INTO teams (event_id, name, description, project_url, presentation_order)
-       VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO teams (event_id, name, description, project_url, presentation_order, photo_url)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-            [req.params.eventId, name, description, project_url, presentation_order]
+            [req.params.eventId, name, description, project_url, presentation_order, photo_url]
         );
 
         res.status(201).json({ team });

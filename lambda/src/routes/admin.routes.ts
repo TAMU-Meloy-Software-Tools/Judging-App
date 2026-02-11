@@ -7,6 +7,196 @@ const router = Router();
 // ==================== ADMIN UTILITIES ====================
 
 /**
+ * Run Auth Provider Migration
+ * Adds support for Auth0, NetID, and other OAuth providers
+ */
+router.post('/migrate-auth-providers', async (_req, res) => {
+    try {
+        console.log('🔧 Starting auth provider migration...');
+
+        await transaction(async (client) => {
+            // Check if columns already exist
+            const checkColumns = await client.query(`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'users' 
+                    AND column_name IN ('auth_provider', 'auth_provider_id', 'auth_metadata')
+            `);
+
+            if (checkColumns.rows.length === 3) {
+                console.log('⚠️  Auth provider columns already exist, skipping migration');
+                return;
+            }
+
+            console.log('Adding auth provider columns...');
+            
+            // Add new columns
+            await client.query(`
+                ALTER TABLE users
+                    ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(20) DEFAULT 'local' 
+                        CHECK (auth_provider IN ('local', 'auth0', 'netid')),
+                    ADD COLUMN IF NOT EXISTS auth_provider_id VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS auth_metadata JSONB
+            `);
+
+            // Make password_hash nullable (not needed for OAuth providers)
+            await client.query(`
+                ALTER TABLE users
+                    ALTER COLUMN password_hash DROP NOT NULL
+            `);
+
+            // Create index for fast lookups by auth provider
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_users_auth_provider 
+                    ON users(auth_provider, auth_provider_id)
+            `);
+
+            // Update existing users to 'local' provider if not already set
+            await client.query(`
+                UPDATE users 
+                SET auth_provider = 'local' 
+                WHERE auth_provider IS NULL
+            `);
+
+            // Create a unique constraint to prevent duplicate auth provider accounts
+            await client.query(`
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_users_auth_provider_unique 
+                    ON users(auth_provider, auth_provider_id) 
+                    WHERE auth_provider_id IS NOT NULL
+            `);
+
+            console.log('✅ Auth provider migration completed successfully!');
+        });
+
+        res.json({ 
+            message: 'Auth provider migration completed successfully',
+            changes: [
+                'Added auth_provider column (local, auth0, netid)',
+                'Added auth_provider_id column',
+                'Added auth_metadata JSONB column',
+                'Made password_hash nullable',
+                'Created indexes for performance',
+                'Added unique constraint for auth providers'
+            ]
+        });
+    } catch (error: any) {
+        console.error('❌ Auth provider migration error:', error);
+        res.status(500).json({ 
+            error: 'Failed to run auth provider migration',
+            details: error.message
+        });
+    }
+});
+
+/**
+ * Add judge_user_id column to events table
+ * Allows each event to have a dedicated judge account
+ */
+router.post('/migrate-judge-account', async (_req, res) => {
+    try {
+        console.log('🔧 Starting judge account migration...');
+
+        await transaction(async (client) => {
+            // Check if column already exists
+            const checkColumn = await client.query(`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'events' 
+                    AND column_name = 'judge_user_id'
+            `);
+
+            if (checkColumn.rows.length > 0) {
+                console.log('⚠️  judge_user_id column already exists, skipping migration');
+                return;
+            }
+
+            console.log('Adding judge_user_id column to events table...');
+            
+            await client.query(`
+                ALTER TABLE events 
+                ADD COLUMN judge_user_id UUID REFERENCES users(id) ON DELETE SET NULL
+            `);
+
+            console.log('✅ Judge account migration completed successfully!');
+        });
+
+        res.json({ 
+            message: 'Judge account migration completed successfully',
+            changes: [
+                'Added judge_user_id column to events table',
+                'Each event can now have a dedicated judge account'
+            ]
+        });
+    } catch (error: any) {
+        console.error('❌ Judge account migration error:', error);
+        res.status(500).json({ 
+            error: 'Failed to run judge account migration',
+            details: error.message
+        });
+    }
+});
+
+/**
+ * Set judge account for LANL Aggies Invent event
+ * Sets abhivur@gmail.com as the judge account
+ */
+router.post('/set-lanl-judge-account', async (_req, res) => {
+    try {
+        console.log('🔧 Setting judge account for LANL Aggies Invent...');
+
+        await transaction(async (client) => {
+            // Find the user with email abhivur@gmail.com
+            const user = await client.query(
+                'SELECT id, email, name, role FROM users WHERE email = $1',
+                ['abhivur@gmail.com']
+            );
+
+            if (user.rows.length === 0) {
+                throw new Error('User abhivur@gmail.com not found');
+            }
+
+            const userId = user.rows[0].id;
+            console.log(`Found user: ${user.rows[0].name} (${user.rows[0].email}), role: ${user.rows[0].role}`);
+
+            // Find the LANL Aggies Invent event (or Spring 2026 Aggies Invent)
+            const event = await client.query(
+                `SELECT id, name FROM events 
+                 WHERE name ILIKE '%aggies%invent%' 
+                 ORDER BY created_at DESC 
+                 LIMIT 1`
+            );
+
+            if (event.rows.length === 0) {
+                throw new Error('Aggies Invent event not found');
+            }
+
+            const eventId = event.rows[0].id;
+            const eventName = event.rows[0].name;
+            console.log(`Found event: ${eventName}`);
+
+            // Update the event to set the judge account
+            await client.query(
+                'UPDATE events SET judge_user_id = $1 WHERE id = $2',
+                [userId, eventId]
+            );
+
+            console.log(`✅ Set ${user.rows[0].email} as judge account for ${eventName}`);
+        });
+
+        res.json({ 
+            message: 'Judge account set successfully',
+            details: 'abhivur@gmail.com is now the judge account for LANL Aggies Invent'
+        });
+    } catch (error: any) {
+        console.error('❌ Set judge account error:', error);
+        res.status(500).json({ 
+            error: 'Failed to set judge account',
+            details: error.message
+        });
+    }
+});
+
+/**
  * Test endpoint to verify admin routes work
  */
 router.get('/test', async (_req, res) => {
@@ -468,3 +658,123 @@ router.get('/activity', authenticate, requireRole(['admin']), async (_req, res) 
 });
 
 export default router;
+
+
+/**
+ * Add photo_url column to teams table
+ */
+router.post('/migrate-team-photo', async (_req, res) => {
+    try {
+        console.log('🔧 Starting team photo migration...');
+
+        await transaction(async (client) => {
+            // Check if column already exists
+            const checkColumn = await client.query(`
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'teams' 
+                    AND column_name = 'photo_url'
+            `);
+
+            if (checkColumn.rows.length > 0) {
+                console.log('⚠️  photo_url column already exists, skipping migration');
+                return;
+            }
+
+            console.log('Adding photo_url column to teams table...');
+            
+            await client.query(`
+                ALTER TABLE teams ADD COLUMN photo_url TEXT
+            `);
+
+            await client.query(`
+                COMMENT ON COLUMN teams.photo_url IS 'URL to team photo (uploaded by admin)'
+            `);
+
+            console.log('✅ Team photo migration completed successfully!');
+        });
+
+        res.json({ 
+            message: 'Team photo migration completed successfully',
+            changes: [
+                'Added photo_url column to teams table',
+                'Teams can now have photos uploaded by admins'
+            ]
+        });
+    } catch (error: any) {
+        console.error('❌ Team photo migration error:', error);
+        res.status(500).json({ 
+            error: 'Failed to run team photo migration',
+            details: error.message
+        });
+    }
+});
+
+/**
+ * Sync judge profile user_ids with event judge accounts
+ * Updates all judge profiles to use their event's dedicated judge account user_id
+ */
+router.post('/sync-judge-profile-users', authenticate, requireRole(['admin']), async (_req, res): Promise<void> => {
+    try {
+        console.log('🔧 Starting judge profile user_id sync...');
+
+        const result = await transaction(async (client) => {
+            // Get count of profiles that need updating
+            const beforeCount = await client.query(`
+                SELECT COUNT(*) as count
+                FROM event_judges ej
+                JOIN events e ON ej.event_id = e.id
+                WHERE e.judge_user_id IS NOT NULL 
+                AND ej.user_id != e.judge_user_id
+            `);
+
+            const profilesToUpdate = parseInt(beforeCount.rows[0].count);
+            console.log(`Found ${profilesToUpdate} judge profiles that need user_id updates`);
+
+            if (profilesToUpdate === 0) {
+                console.log('⚠️  All judge profiles already have correct user_ids');
+                return { profilesUpdated: 0, alreadySynced: true };
+            }
+
+            // Update all judge profiles to use their event's judge_user_id
+            const updateResult = await client.query(`
+                UPDATE event_judges 
+                SET user_id = (
+                    SELECT judge_user_id 
+                    FROM events 
+                    WHERE events.id = event_judges.event_id
+                )
+                WHERE EXISTS (
+                    SELECT 1 
+                    FROM events 
+                    WHERE events.id = event_judges.event_id 
+                    AND events.judge_user_id IS NOT NULL
+                )
+            `);
+
+            console.log(`✅ Updated ${updateResult.rowCount} judge profiles with correct user_ids`);
+            return { profilesUpdated: updateResult.rowCount, alreadySynced: false };
+        });
+
+        if (result.alreadySynced) {
+            res.json({ 
+                message: 'All judge profiles already synced',
+                profilesUpdated: 0
+            });
+            return;
+        }
+
+        res.json({ 
+            message: 'Judge profile user_ids synced successfully',
+            profilesUpdated: result.profilesUpdated,
+            details: 'All judge profiles now use their event\'s dedicated judge account user_id'
+        });
+    } catch (error: any) {
+        console.error('❌ Sync judge profile users error:', error);
+        res.status(500).json({ 
+            error: 'Failed to sync judge profile user_ids',
+            details: error.message
+        });
+    }
+});
+

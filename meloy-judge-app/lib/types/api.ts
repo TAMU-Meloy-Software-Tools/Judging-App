@@ -24,6 +24,7 @@ export interface Event {
     min_team_size: number;
     max_teams: number | null;
     sponsor_id: string | null;
+    judge_user_id: string | null;
     judging_phase: string;
     current_active_team_id: string | null;
     created_at: string;
@@ -31,6 +32,7 @@ export interface Event {
     sponsor?: Sponsor;  // Populated by API join
     teams_count?: string;  // Populated by API aggregation
     judges_count?: string;  // Populated by API aggregation
+    judge_user?: { id: string; email: string; name: string };  // Populated by API join
 }
 
 export interface TeamMember {
@@ -59,6 +61,8 @@ export interface User {
     email: string;
     name: string;
     role: 'admin' | 'moderator' | 'judge';
+    auth_provider?: 'local' | 'auth0' | 'netid';
+    is_active?: boolean;
     created_at: string;
     updated_at: string;
 }

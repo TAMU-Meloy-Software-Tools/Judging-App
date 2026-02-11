@@ -16,8 +16,10 @@ const EVENT_ID_KEY = 'meloy_event_id';
  */
 export function setJudgeProfile(profile: JudgeProfile): void {
     if (typeof window !== 'undefined') {
+        console.log('[setJudgeProfile] Saving profile:', profile);
         localStorage.setItem(JUDGE_PROFILE_KEY, JSON.stringify(profile));
         localStorage.setItem(EVENT_ID_KEY, profile.event_id);
+        console.log('[setJudgeProfile] Saved to localStorage');
     }
 }
 
@@ -28,11 +30,17 @@ export function getJudgeProfile(): JudgeProfile | null {
     if (typeof window === 'undefined') return null;
     
     const stored = localStorage.getItem(JUDGE_PROFILE_KEY);
-    if (!stored) return null;
+    if (!stored) {
+        console.log('[getJudgeProfile] No profile in localStorage');
+        return null;
+    }
     
     try {
-        return JSON.parse(stored) as JudgeProfile;
-    } catch {
+        const profile = JSON.parse(stored) as JudgeProfile;
+        console.log('[getJudgeProfile] Retrieved profile:', profile);
+        return profile;
+    } catch (error) {
+        console.error('[getJudgeProfile] Failed to parse profile:', error);
         return null;
     }
 }

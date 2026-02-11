@@ -42,7 +42,7 @@ router.get('/profiles/:eventId', authenticate, async (req: AuthRequest, res) => 
 
         // Get all judge profiles for this event that belong to the current user
         const profiles = await query(
-            `SELECT id, name, assigned_at 
+            `SELECT id, event_id, user_id, name, assigned_at 
              FROM event_judges 
              WHERE event_id = $1 AND user_id = $2 
              ORDER BY name`,

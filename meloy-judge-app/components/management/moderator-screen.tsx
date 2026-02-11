@@ -152,17 +152,24 @@ export function ModeratorScreen({ eventId, onBack, userName }: ModeratorScreenPr
     return () => clearInterval(intervalId)
   }, [eventId, isInitialLoad])
 
-  // Real sponsor data from RDS or fallback
-  const isPWSEvent = event?.event_type?.includes("problems-worth-solving") ?? false
-  const sponsor = event?.sponsor_id && event.sponsor ? {
-    name: event.sponsor.name ?? "Sponsor",
-    logo: event.sponsor.logo_url ?? (isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png"),
-    color: event.sponsor.primary_color ?? (isPWSEvent ? "#500000" : "#b91c1c")
-  } : {
-    name: isPWSEvent ? "Meloy Program" : "ExxonMobil",
-    logo: isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png",
-    color: isPWSEvent ? "#500000" : "#b91c1c"
+  // Get sponsor data with fallback logic
+  const getSponsorData = () => {
+    const isPWSEvent = event?.event_type?.includes("problems-worth-solving") ?? false
+    
+    return event?.sponsor_id && event.sponsor ? {
+      name: event.sponsor.name ?? "Sponsor",
+      logo: event.sponsor.logo_url ?? (isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png"),
+      primaryColor: event.sponsor.primary_color ?? (isPWSEvent ? "#500000" : "#b91c1c"),
+      secondaryColor: event.sponsor.secondary_color ?? (isPWSEvent ? "#3d0000" : "#7f1d1d")
+    } : {
+      name: isPWSEvent ? "Meloy Program" : "ExxonMobil",
+      logo: isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png",
+      primaryColor: isPWSEvent ? "#500000" : "#b91c1c",
+      secondaryColor: isPWSEvent ? "#3d0000" : "#7f1d1d"
+    }
   }
+
+  const sponsor = getSponsorData()
 
   const teamsCompleted = teams.filter((t) => t.status === "completed").length
   const teamsActive = teams.filter((t) => t.status === "active").length
@@ -259,46 +266,53 @@ export function ModeratorScreen({ eventId, onBack, userName }: ModeratorScreenPr
       <div className="flex-1">
         <div className="mx-auto max-w-7xl px-6 py-5 lg:py-6 lg:px-8">
           {/* Company/Sponsor Card with Event Phase */}
-          <div className="relative mb-6 overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-red-950 shadow-xl">
-            <div className="relative rounded-[14px] sm:rounded-[22px] bg-linear-to-b from-red-600 to-red-950">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 rounded-[14px] sm:rounded-[22px]" />
-              {/* Sponsor content */}
-              <div className="relative flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 lg:py-5 lg:px-6">
-                <div className="group flex items-center gap-3 sm:gap-4 lg:gap-5">
-                  <div className="relative flex shrink-0 items-center justify-center rounded-xl lg:rounded-2xl py-2 px-4 sm:py-3 sm:px-5 lg:py-3 lg:px-6 xl:py-4 xl:px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
-                    <Image src={sponsor.logo} alt={sponsor.name} width={120} height={60} className="relative h-8 sm:h-10 lg:h-14 xl:h-16 w-auto max-w-[100px] sm:max-w-[130px] lg:max-w-[180px] object-contain" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] sm:text-xs uppercase tracking-[0.12em] text-white/70">Presented by</p>
-                    <p className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-white leading-tight">{sponsor.name}</p>
+          {sponsor && (
+            <div className="relative mb-6 overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-red-950 shadow-xl">
+              <div
+                className="relative rounded-[14px] sm:rounded-[22px]"
+                style={{
+                  background: `linear-gradient(to bottom, ${sponsor.primaryColor}, ${sponsor.secondaryColor})`
+                }}
+              >
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 rounded-[14px] sm:rounded-[22px]" />
+                {/* Sponsor content */}
+                <div className="relative flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 lg:py-5 lg:px-6">
+                  <div className="group flex items-center gap-3 sm:gap-4 lg:gap-5">
+                    <div className="relative flex shrink-0 items-center justify-center rounded-xl lg:rounded-2xl py-2 px-4 sm:py-3 sm:px-5 lg:py-3 lg:px-6 xl:py-4 xl:px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
+                      <Image src={sponsor.logo} alt={sponsor.name} width={120} height={60} className="relative h-8 sm:h-10 lg:h-14 xl:h-16 w-auto max-w-[100px] sm:max-w-[130px] lg:max-w-[180px] object-contain" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] sm:text-xs uppercase tracking-[0.12em] text-white/70">Presented by</p>
+                      <p className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-white leading-tight">{sponsor.name}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Status strip */}
-              <div className="relative border-t border-white/10">
-                <div className="absolute inset-0 bg-black/15 backdrop-blur-sm" />
-                <div className="relative flex items-center justify-center gap-2.5 py-2 sm:py-2.5">
-                  {eventStatus === 'ended' ? (
-                    <>
-                      <span className="relative flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-400" />
-                      </span>
-                      <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging Ended</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="relative flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                      </span>
-                      <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging in Progress</span>
-                    </>
-                  )}
+                {/* Status strip */}
+                <div className="relative border-t border-white/10">
+                  <div className="absolute inset-0 bg-black/15 backdrop-blur-sm" />
+                  <div className="relative flex items-center justify-center gap-2.5 py-2 sm:py-2.5">
+                    {eventStatus === 'ended' ? (
+                      <>
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-slate-400" />
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging Ended</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging in Progress</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Team Queue - Horizontal Layout */}
           <Card className="relative mb-6 overflow-hidden rounded-[28px] border-2 border-primary/25 bg-white/95 shadow-lg">

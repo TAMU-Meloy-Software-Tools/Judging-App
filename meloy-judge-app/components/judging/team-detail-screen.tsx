@@ -4,7 +4,7 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { getTeam } from "@/lib/api/teams"
 import { getRubric, submitScore } from "@/lib/api/scores"
-import type { Team, RubricCriteria } from "@/lib/types/api"
+import type { Team, RubricCriteria, Event } from "@/lib/types/api"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,10 +24,12 @@ import {
 import { ArrowLeft, Users, Megaphone, BadgeDollarSign, Presentation, Sparkles, Save, User, Loader2 } from "lucide-react"
 
 interface TeamDetailScreenProps {
+  eventId: string
   teamId: string
   judgeId: string | null
-  onBack: () => void
   judgeName: string | null
+  onBack: () => void
+  onSubmitScores: () => void
   isAdmin?: boolean
 }
 
@@ -42,6 +44,7 @@ const iconMap: Record<string, typeof Megaphone> = {
 
 export function TeamDetailScreen({ teamId, judgeId, onBack, judgeName, isAdmin = false }: TeamDetailScreenProps) {
   const [team, setTeam] = useState<Team | null>(null)
+  const [event, setEvent] = useState<Event | null>(null)
   const [rubric, setRubric] = useState<RubricCriteria[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -67,6 +70,13 @@ export function TeamDetailScreen({ teamId, judgeId, onBack, judgeName, isAdmin =
         setTeam(teamData.team)
         setRubric(rubricData.criteria)
         
+        // Fetch event data to get sponsor info
+        if (teamData.team.event_id) {
+          const { getEvent } = await import('@/lib/api')
+          const eventData = await getEvent(teamData.team.event_id)
+          setEvent(eventData.event)
+        }
+        
         // Initialize scores with 0 for each criterion
         const initialScores = rubricData.criteria.reduce(
           (acc, criteria) => ({
@@ -85,12 +95,26 @@ export function TeamDetailScreen({ teamId, judgeId, onBack, judgeName, isAdmin =
     fetchData()
   }, [teamId])
 
-  // Mock sponsor data - replace with real data later
-  const sponsor = {
-    name: "ExxonMobil",
-    logo: "/ExxonLogo.png",
-    color: "#500000"
+  // Get sponsor data with fallback logic
+  const getSponsorData = () => {
+    if (!event) return null
+    
+    const isPWSEvent = event.event_type?.includes("problems-worth-solving") ?? false
+    
+    return event.sponsor_id && event.sponsor ? {
+      name: event.sponsor.name ?? "Sponsor",
+      logo: event.sponsor.logo_url ?? (isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png"),
+      primaryColor: event.sponsor.primary_color ?? (isPWSEvent ? "#500000" : "#b91c1c"),
+      secondaryColor: event.sponsor.secondary_color ?? (isPWSEvent ? "#3d0000" : "#7f1d1d")
+    } : {
+      name: isPWSEvent ? "Meloy Program" : "ExxonMobil",
+      logo: isPWSEvent ? "/TAMUlogo.png" : "/ExxonLogo.png",
+      primaryColor: isPWSEvent ? "#500000" : "#b91c1c",
+      secondaryColor: isPWSEvent ? "#3d0000" : "#7f1d1d"
+    }
   }
+
+  const sponsor = getSponsorData()
 
   const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0)
   const maxTotalScore = rubric.reduce((sum, criteria) => sum + criteria.max_score, 0)
@@ -255,34 +279,41 @@ export function TeamDetailScreen({ teamId, judgeId, onBack, judgeName, isAdmin =
 
       <main className="relative mx-auto max-w-4xl px-6 py-5 lg:py-6 lg:px-8">
         {/* Sponsor Card with Status */}
-        <div className="relative mb-4 sm:mb-6 overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-red-950 shadow-xl">
-          <div className="relative rounded-[14px] sm:rounded-[22px] bg-linear-to-b from-red-600 to-red-950">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 rounded-[14px] sm:rounded-[22px]" />
-            {/* Sponsor content */}
-            <div className="relative flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 lg:py-5 lg:px-6">
-              <div className="group flex items-center gap-3 sm:gap-4 lg:gap-5">
-                <div className="relative flex shrink-0 items-center justify-center rounded-xl lg:rounded-2xl py-2 px-4 sm:py-3 sm:px-5 lg:py-3 lg:px-6 xl:py-4 xl:px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
-                  <Image src={sponsor.logo} alt={sponsor.name} width={120} height={60} className="relative h-8 sm:h-10 lg:h-14 xl:h-16 w-auto max-w-[100px] sm:max-w-[130px] lg:max-w-[180px] object-contain" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] sm:text-xs uppercase tracking-[0.12em] text-white/70">Presented by</p>
-                  <p className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-white leading-tight">{sponsor.name}</p>
+        {sponsor && (
+          <div className="relative mb-4 sm:mb-6 overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-red-950 shadow-xl">
+            <div
+              className="relative rounded-[14px] sm:rounded-[22px]"
+              style={{
+                background: `linear-gradient(to bottom, ${sponsor.primaryColor}, ${sponsor.secondaryColor})`
+              }}
+            >
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20 rounded-[14px] sm:rounded-[22px]" />
+              {/* Sponsor content */}
+              <div className="relative flex items-center justify-center py-3 px-4 sm:py-4 sm:px-5 lg:py-5 lg:px-6">
+                <div className="group flex items-center gap-3 sm:gap-4 lg:gap-5">
+                  <div className="relative flex shrink-0 items-center justify-center rounded-xl lg:rounded-2xl py-2 px-4 sm:py-3 sm:px-5 lg:py-3 lg:px-6 xl:py-4 xl:px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
+                    <Image src={sponsor.logo} alt={sponsor.name} width={120} height={60} className="relative h-8 sm:h-10 lg:h-14 xl:h-16 w-auto max-w-[100px] sm:max-w-[130px] lg:max-w-[180px] object-contain" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] sm:text-xs uppercase tracking-[0.12em] text-white/70">Presented by</p>
+                    <p className="text-base sm:text-lg lg:text-xl xl:text-2xl font-semibold text-white leading-tight">{sponsor.name}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            {/* Status strip */}
-            <div className="relative border-t border-white/10">
-              <div className="absolute inset-0 bg-black/15 backdrop-blur-sm" />
-              <div className="relative flex items-center justify-center gap-2.5 py-2 sm:py-2.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                </span>
-                <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging in Progress</span>
+              {/* Status strip */}
+              <div className="relative border-t border-white/10">
+                <div className="absolute inset-0 bg-black/15 backdrop-blur-sm" />
+                <div className="relative flex items-center justify-center gap-2.5 py-2 sm:py-2.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-medium uppercase tracking-[0.15em] text-white/80">Judging in Progress</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <section className="space-y-9">
           <div>
@@ -410,21 +441,28 @@ export function TeamDetailScreen({ teamId, judgeId, onBack, judgeName, isAdmin =
       <AlertDialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <AlertDialogContent className="max-w-2xl rounded-3xl border-2 border-red-950/30 bg-white/80 backdrop-blur-xl shadow-2xl p-0 overflow-hidden">
           {/* Sponsor gradient section at top */}
-          <div className="relative h-40 bg-linear-to-b from-red-600 to-red-950 overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
+          {sponsor && (
+            <div
+              className="relative h-40 overflow-hidden"
+              style={{
+                background: `linear-gradient(to bottom, ${sponsor.primaryColor}, ${sponsor.secondaryColor})`
+              }}
+            >
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAyIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
 
-            <div className="relative flex items-center justify-center h-full">
-              <div className="flex shrink-0 items-center justify-center rounded-2xl py-4 px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
-                <Image
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  width={140}
-                  height={70}
-                  className="h-16 w-auto max-w-[200px] object-contain"
-                />
+              <div className="relative flex items-center justify-center h-full">
+                <div className="flex shrink-0 items-center justify-center rounded-2xl py-4 px-8 shadow-xl backdrop-blur-xl bg-white/70 border-2 border-white/80">
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    width={140}
+                    height={70}
+                    className="h-16 w-auto max-w-[200px] object-contain"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Success message section */}
           <AlertDialogHeader className="p-10 pb-6 text-center flex flex-col items-center">

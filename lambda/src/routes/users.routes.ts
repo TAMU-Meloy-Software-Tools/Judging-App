@@ -4,17 +4,28 @@ import { query, queryOne } from '../db/connection';
 
 const router = Router();
 
-// ==================== USER MANAGEMENT ====================
+// ==================== USER MANAGEMENT (ADMIN) ====================
 
 /**
  * Get all users (admin only)
  */
 router.get('/', authenticate, requireRole(['admin']), async (_req, res) => {
     try {
-        const users = await query('SELECT id, netid, email, first_name, last_name, role, created_at FROM users ORDER BY created_at DESC');
+        const users = await query(
+            `SELECT 
+                id, 
+                email, 
+                name,
+                role, 
+                created_at,
+                updated_at
+             FROM users 
+             ORDER BY created_at DESC`
+        );
         res.json({ users });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch users' });
+        console.error('Failed to fetch users:', error);
+        res.status(500).json({ error: 'Failed to fetch users', details: error instanceof Error ? error.message : 'Unknown error' });
     }
 });
 
@@ -32,7 +43,7 @@ router.put('/:userId/role', authenticate, requireRole(['admin']), async (req, re
         }
 
         const user = await queryOne(
-            'UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 RETURNING id, netid, email, first_name, last_name, role',
+            'UPDATE users SET role = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email, name, role',
             [role, req.params.userId]
         );
 

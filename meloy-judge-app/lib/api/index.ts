@@ -8,4 +8,6 @@ export * from './events';
 export * from './teams';
 export * from './scores';
 export * from './admin';
+export * from './sponsors';
+export * from './judges';
 export * from './client';

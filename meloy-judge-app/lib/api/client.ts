@@ -2,7 +2,8 @@
  * Base API client for making HTTP requests
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// Use local proxy for authenticated calls
+const API_URL = '/api/proxy';
 
 if (!API_URL && typeof window !== 'undefined') {
     console.warn('NEXT_PUBLIC_API_URL is not set');
@@ -102,6 +103,9 @@ export async function patch<T>(endpoint: string, data?: any): Promise<T> {
 /**
  * Helper for DELETE requests
  */
-export async function del<T>(endpoint: string): Promise<T> {
-    return apiCall<T>(endpoint, { method: 'DELETE' });
+export async function del<T>(endpoint: string, data?: any): Promise<T> {
+    return apiCall<T>(endpoint, {
+        method: 'DELETE',
+        body: data ? JSON.stringify(data) : undefined,
+    });
 }

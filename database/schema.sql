@@ -17,16 +17,33 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255), -- Nullable for OAuth providers
     name VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'judge' CHECK (role IN ('judge', 'admin', 'moderator')),
     is_active BOOLEAN DEFAULT true,
     last_login TIMESTAMP,
+    
+    -- Multi-provider authentication support
+    auth_provider VARCHAR(20) DEFAULT 'local' CHECK (auth_provider IN ('local', 'auth0', 'netid')),
+    auth_provider_id VARCHAR(255), -- Auth0 sub, NetID UIN, etc.
+    auth_metadata JSONB, -- Additional auth provider data
+    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-COMMENT ON TABLE users IS 'All user accounts with authentication credentials';
+-- Index for fast auth provider lookups
+CREATE INDEX idx_users_auth_provider ON users(auth_provider, auth_provider_id);
+
+-- Ensure unique auth provider accounts
+CREATE UNIQUE INDEX idx_users_auth_provider_unique 
+    ON users(auth_provider, auth_provider_id) 
+    WHERE auth_provider_id IS NOT NULL;
+
+COMMENT ON TABLE users IS 'All user accounts with multi-provider authentication support (local, Auth0, NetID)';
+COMMENT ON COLUMN users.auth_provider IS 'Authentication provider: local (password), auth0, netid';
+COMMENT ON COLUMN users.auth_provider_id IS 'Unique identifier from auth provider (Auth0 sub, NetID UIN, etc.)';
+COMMENT ON COLUMN users.auth_metadata IS 'Additional metadata from auth provider (profile data, org info, etc.)';
 COMMENT ON COLUMN users.role IS 'User role: judge (scores teams), admin (full access), moderator (controls event flow)';
 COMMENT ON COLUMN users.is_active IS 'Soft disable for users without deletion';
 

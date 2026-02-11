@@ -4,12 +4,15 @@ import cors from 'cors';
 import { logging } from './middleware';
 import {
     authRoutes,
+    authSyncRoutes,
     eventsRoutes,
     teamsRoutes,
     scoresRoutes,
     judgingRoutes,
     usersRoutes,
-    adminRoutes
+    adminRoutes,
+    sponsorsRoutes,
+    judgeProfilesRoutes
 } from './routes';
 
 const app = express();
@@ -29,6 +32,7 @@ app.get('/health', async (_req, res) => {
 
 // Auth routes
 app.use('/auth', authRoutes);
+app.use('/auth', authSyncRoutes); // Auth0/OAuth user sync
 
 // Core API routes
 app.use('/events', eventsRoutes);
@@ -38,6 +42,8 @@ app.use('/rubric', scoresRoutes);
 app.use('/judge', judgingRoutes);
 app.use('/users', usersRoutes);
 app.use('/admin', adminRoutes);
+app.use('/sponsors', sponsorsRoutes);
+app.use('/', judgeProfilesRoutes); // Judge profiles routes (includes /events/:eventId/judge-profiles)
 
 // ==================== ERROR HANDLING ====================
 

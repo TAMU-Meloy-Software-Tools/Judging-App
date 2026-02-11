@@ -6,7 +6,10 @@ import { successResponse, errorResponse } from '../../utils/response';
 /**
  * GET /events
  * 
- * List all events with optional filtering
+ * List events with role-based filtering:
+ * - Judges: Only see events they're assigned to via event_judges table
+ * - Admins/Moderators: See all events
+ * 
  * Query params:
  * - status: 'upcoming' | 'active' | 'completed'
  * - type: 'aggies-invent' | 'problems-worth-solving'
@@ -30,6 +33,12 @@ export async function handler(
     const status = event.queryStringParameters?.status;
     const eventType = event.queryStringParameters?.type;
 
+    // Get user info from auth middleware
+    const userId = event.requestContext?.authorizer?.userId;
+    const userRole = event.requestContext?.authorizer?.role;
+
+    console.log('User context:', { userId, userRole });
+
     // Build dynamic query with filters
     const conditions: string[] = ['1=1']; // Always true starting condition
     const params: any[] = [];
@@ -43,6 +52,15 @@ export async function handler(
     if (eventType) {
       conditions.push(`e.event_type = $${paramIndex++}`);
       params.push(eventType);
+    }
+
+    // CRITICAL: Judges should only see events where they are the dedicated judge account
+    if (userRole === 'judge' && userId) {
+      conditions.push(`e.judge_user_id = $${paramIndex++}`);
+      params.push(userId);
+      console.log('Filtering events for judge account:', userId);
+    } else {
+      console.log('Showing all events for role:', userRole);
     }
 
     // Fetch events with sponsor info (LEFT JOIN in case no sponsor)
@@ -67,7 +85,7 @@ export async function handler(
       params
     );
 
-    console.log(`Found ${events.length} events`);
+    console.log(`Found ${events.length} events for user ${userId} (role: ${userRole})`);
 
     return successResponse({
       events: events.map(e => ({

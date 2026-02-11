@@ -148,3 +148,15 @@ export async function getMyProgress(
 ): Promise<any> {
     return get<any>(`/events/${eventId}/my-progress?judgeId=${judgeId}`);
 }
+
+/**
+ * Update event's dedicated judge account (admin only)
+ * @param eventId - The event ID
+ * @param userEmail - Email of the user to set as judge account
+ */
+export async function updateJudgeAccount(
+    eventId: string,
+    userEmail: string
+): Promise<{ event: Event }> {
+    return put<{ event: Event }>(`/events/${eventId}/judge-account`, { userEmail });
+}
