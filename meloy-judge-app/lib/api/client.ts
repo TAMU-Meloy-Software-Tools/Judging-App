@@ -2,12 +2,11 @@
  * Base API client for making HTTP requests
  */
 
-// Use local proxy for authenticated calls
-const API_URL = '/api/proxy';
+// Call backend API directly from browser
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://o90rhtv5j4.execute-api.us-east-1.amazonaws.com/prod';
 
-if (!API_URL && typeof window !== 'undefined') {
-    console.warn('NEXT_PUBLIC_API_URL is not set');
-}
+// Cache for the auth token
+let cachedToken: string | null = null;
 
 export class ApiError extends Error {
     constructor(
@@ -20,6 +19,24 @@ export class ApiError extends Error {
     }
 }
 
+/**
+ * Get the Auth0 ID token from the server
+ */
+async function getAuthToken(): Promise<string> {
+    if (cachedToken) {
+        return cachedToken;
+    }
+
+    const response = await fetch('/api/token');
+    if (!response.ok) {
+        throw new ApiError('Failed to get auth token', response.status);
+    }
+
+    const data = await response.json();
+    cachedToken = data.token;
+    return cachedToken;
+}
+
 export async function apiCall<T>(
     endpoint: string,
     options?: RequestInit
@@ -27,10 +44,14 @@ export async function apiCall<T>(
     const url = `${API_URL}${endpoint}`;
 
     try {
+        // Get auth token
+        const token = await getAuthToken();
+
         const response = await fetch(url, {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
                 ...options?.headers,
             },
         });
@@ -43,6 +64,11 @@ export async function apiCall<T>(
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
+            // Clear cached token on 401
+            if (response.status === 401) {
+                cachedToken = null;
+            }
+
             throw new ApiError(
                 data.error || `API request failed with status ${response.status}`,
                 response.status,
