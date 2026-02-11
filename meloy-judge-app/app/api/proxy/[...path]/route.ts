@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 
 async function handleProxy(req: NextRequest, path: string[], method: string) {
     try {
-        // Get Auth0 session - in v4, getSession() works with Request objects
-        const session = await auth0.getSession();
+        // Get Auth0 session - pass the request for cookie access
+        const session = await auth0.getSession(req);
         
         if (!session?.user) {
             return NextResponse.json({ 
