@@ -8,9 +8,7 @@ applications:
           commands:
             - corepack enable
             - corepack prepare pnpm@latest --activate
-            - pnpm install --frozen-lockfile
-        build:
-          commands:
+            # Set env vars BEFORE install so they're available during build
             - echo "AUTH0_DOMAIN=$AUTH0_DOMAIN" >> .env.production
             - echo "AUTH0_CLIENT_ID=$AUTH0_CLIENT_ID" >> .env.production
             - echo "AUTH0_CLIENT_SECRET=$AUTH0_CLIENT_SECRET" >> .env.production
@@ -21,6 +19,9 @@ applications:
             - echo "APP_BASE_URL=$APP_BASE_URL" >> .env.production
             - echo "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" >> .env.production
             - echo "API_URL=$NEXT_PUBLIC_API_URL" >> .env.production
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
             - pnpm run build
       artifacts:
         baseDirectory: .next
