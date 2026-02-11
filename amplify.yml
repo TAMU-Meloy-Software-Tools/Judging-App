@@ -12,12 +12,7 @@ frontend:
   artifacts:
     baseDirectory: meloy-judge-app
     files:
-      - '.next/**/*'
-      - 'node_modules/**/*'
-      - 'public/**/*'
-      - 'package.json'
-      - 'next.config.js'
-      - '.env.production'
+      - '**/*'
   cache:
     paths:
       - meloy-judge-app/node_modules/**/*
