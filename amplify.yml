@@ -1,20 +1,19 @@
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - cd meloy-judge-app
-        - npm install -g pnpm
-        - pnpm install --frozen-lockfile
-    build:
-      commands:
-        - pnpm run build
-  artifacts:
-    baseDirectory: meloy-judge-app/.next
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - meloy-judge-app/node_modules/**/*
-      - meloy-judge-app/.next/cache/**/*
-      - ~/.pnpm-store/**/*
+applications:
+  - appRoot: meloy-judge-app
+    framework: nextjs
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - corepack prepare pnpm@latest --activate
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - pnpm run build
+      buildPath: /
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
