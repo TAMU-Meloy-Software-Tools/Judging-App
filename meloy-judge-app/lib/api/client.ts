@@ -3,7 +3,7 @@
  */
 
 // Get API URL from Next.js env config (with fallback)
-const API_URL: string = process.env.NEXT_PUBLIC_API_URL || 'https://o90rhtv5j4.execute-api.us-east-1.amazonaws.com/prod';
+const API_URL: string = process.env.NEXT_PUBLIC_API_URL || 'https://o90rhtv5i4.execute-api.us-east-1.amazonaws.com/prod';
 
 if (!process.env.NEXT_PUBLIC_API_URL) {
     console.warn('NEXT_PUBLIC_API_URL not set, using fallback URL');
